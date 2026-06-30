@@ -10,36 +10,33 @@
 
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        body { padding: 20px; background-color: #f4f7f6; }
-        h2 { color: #333; margin-bottom: 15px; text-align: center; font-size: 22px; }
+        body { padding: 15px; background-color: #f4f7f6; max-width: 1200px; margin: 0 auto; }
+        h2 { color: #333; margin-bottom: 10px; text-align: center; font-size: 20px; }
         
         /* Thanh điều hướng & Đăng nhập */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 14px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: white; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 13px; }
         .admin-login { display: flex; gap: 10px; align-items: center; }
-        .admin-login input { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; }
-        .btn-login { background-color: #4a6fa5; color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; }
-        .btn-logout { background-color: #6c757d; color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; }
+        .admin-login input { padding: 5px 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-login { background-color: #4a6fa5; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
+        .btn-logout { background-color: #6c757d; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
 
-        /* Khu vực Thống kê Tương tác */
-        .stats-container { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .stat-box { flex: 1; min-width: 150px; background: white; padding: 12px; border-radius: 6px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #4a6fa5; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        /* Khu vực Thống kê Tối ưu Gọn nhẹ */
+        .stats-wrapper { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .stat-box { background: white; padding: 10px; border-radius: 6px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #4a6fa5; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
         .stat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        .stat-box.active { border-width: 6px; background-color: #fafbfc; }
-        .stat-box h4 { font-size: 12px; color: #6c757d; text-transform: uppercase; margin-bottom: 4px; }
-        .stat-box p { font-size: 20px; font-weight: bold; color: #333; }
+        .stat-box.active { border-width: 5px; background-color: #fafbfc; }
+        .stat-box h4 { font-size: 11px; color: #6c757d; text-transform: uppercase; margin-bottom: 2px; }
+        .stat-box p { font-size: 16px; font-weight: bold; color: #333; }
 
-        .extended-stats { background: white; padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-around; font-size: 13px; }
-
-        /* Khối Thống kê Chuyên sâu Tuổi & Giới tính */
-        .age-gender-stats { background: #eef1f6; border: 2px solid #b0c4de; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center; font-size: 14px; }
-        .age-gender-stats strong { color: #2c3e50; }
-        .age-badge { background-color: #3f577a; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+        .summary-bar { background: #eef1f6; border: 1px solid #b0c4de; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .summary-bar strong { color: #2c3e50; }
+        .age-badge { background-color: #3f577a; color: white; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
 
         /* Bảng dữ liệu */
-        .table-container { background: white; border-radius: 8px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        .table-container { background: white; border-radius: 8px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
         
-        th, td { padding: 10px 12px; border: 1px solid #ced4da; }
+        th, td { padding: 8px 10px; border: 1px solid #ced4da; }
         th { background-color: #e9ecef; color: #333; font-weight: 700; text-align: center; }
         td { vertical-align: middle; }
         td:first-child, td:nth-child(3), td:nth-child(4), td:nth-child(5), td:nth-child(6), td:nth-child(7), td:nth-child(9) {
@@ -49,45 +46,45 @@
         tr:hover { background-color: #f1f3f5; }
 
         /* Trạng thái */
-        .status-badge { display: inline-block; padding: 5px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; text-align: center; }
+        .status-badge { display: inline-block; padding: 4px 6px; border-radius: 10px; font-size: 10px; font-weight: 600; text-align: center; }
         .status-on { background-color: #ffe8d6; color: #d17a3f; }
         .status-off { background-color: #e8f5e9; color: #2e7d32; }
 
         /* Nút thao tác */
-        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; text-decoration: none; display: inline-block; }
-        .btn-view { background-color: #eef1f6; color: #3f577a; border: 1px solid #b0c4de; margin-right: 4px; }
+        .btn { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 600; text-decoration: none; display: inline-block; }
+        .btn-view { background-color: #eef1f6; color: #3f577a; border: 1px solid #b0c4de; margin-right: 2px; }
         .btn-view:hover { background-color: #d8e2ec; }
         
         /* Nhóm nút Thao tác */
         .admin-only { display: none; }
-        .btn-add { background-color: #007bff; color: white; margin-bottom: 12px; float: left; }
+        .btn-add { background-color: #007bff; color: white; margin-top: 10px; float: left; }
         .btn-add:hover { background-color: #0056b3; }
-        .btn-edit { background-color: #ffc107; color: #212529; border: 1px solid #d39e00; margin-right: 4px; }
+        .btn-edit { background-color: #ffc107; color: #212529; border: 1px solid #d39e00; margin-right: 2px; }
         .btn-edit:hover { background-color: #e0a800; }
         .btn-delete { background-color: #dc3545; color: white; }
         .btn-delete:hover { background-color: #bd2130; }
 
-        .btn-export { background-color: #28a745; color: white; float: right; margin-bottom: 12px; }
+        .btn-export { background-color: #28a745; color: white; float: right; margin-top: 10px; }
         .btn-export:hover { background-color: #218838; }
 
         .clear-float::after { content: ""; display: table; clear: both; }
 
         /* Modal Popup */
         .modal { display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-        .modal-content { background-color: white; padding: 25px; border-radius: 10px; width: 480px; max-width: 90%; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 85vh; overflow-y: auto; }
-        .close-btn { position: absolute; top: 12px; right: 18px; font-size: 22px; font-weight: bold; cursor: pointer; color: #aaa; }
+        .modal-content { background-color: white; padding: 20px; border-radius: 8px; width: 450px; max-width: 90%; position: relative; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 85vh; overflow-y: auto; }
+        .close-btn { position: absolute; top: 8px; right: 14px; font-size: 18px; font-weight: bold; cursor: pointer; color: #aaa; }
         .close-btn:hover { color: #333; }
         
         /* Form nhập liệu */
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 3px; font-weight: 600; color: #495057; font-size: 12px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 7px 10px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px; }
-        .form-group textarea { resize: vertical; height: 50px; }
+        .form-group { margin-bottom: 8px; }
+        .form-group label { display: block; margin-bottom: 2px; font-weight: 600; color: #495057; font-size: 11px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 6px 8px; border: 1px solid #ced4da; border-radius: 4px; font-size: 12px; }
+        .form-group textarea { resize: vertical; height: 40px; }
 
-        .modal-info { margin-bottom: 10px; line-height: 1.5; font-size: 14px; }
+        .modal-info { margin-bottom: 8px; line-height: 1.4; font-size: 13px; }
         .modal-info span { font-weight: bold; color: #333; }
-        .history-item { margin-bottom: 10px; padding: 8px; background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; font-size: 13px; }
-        .history-item p { margin-bottom: 2px; }
+        .history-item { margin-bottom: 8px; padding: 6px; background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; font-size: 12px; }
+        .history-item p { margin-bottom: 1px; }
     </style>
 </head>
 <body>
@@ -98,7 +95,7 @@
         <div>Quyền truy cập: <strong id="login-status" style="color: #0081a7;">Người xem (Khách)</strong></div>
         <div class="admin-login">
             <div id="login-form-area">
-                <input type="password" id="admin-pass" placeholder="Mật khẩu Admin..." size="15" />
+                <input type="password" id="admin-pass" placeholder="Mật khẩu Admin..." size="12" />
                 <button class="btn-login" onclick="loginAdmin()">Đăng nhập</button>
             </div>
             <div id="logout-btn-area" style="display: none;">
@@ -107,7 +104,7 @@
         </div>
     </div>
 
-    <div class="stats-container">
+    <div class="stats-wrapper">
         <div class="stat-box" id="filter-all" onclick="setFilter('all')" style="border-left-color: #4a6fa5;">
             <h4>TỔNG BỆNH NHÂN</h4>
             <p id="total-patients">0</p>
@@ -126,15 +123,11 @@
         </div>
     </div>
 
-    <div class="extended-stats">
-        <span><strong style="color: #4a6fa5;">Số lượng Nam:</strong> <span id="stat-nam">0</span></span>
-        <span><strong style="color: #d17a3f;">Số lượng Nữ:</strong> <span id="stat-nu">0</span></span>
+    <div class="summary-bar">
+        <span><strong style="color: #4a6fa5;">Nam:</strong> <span id="stat-nam">0</span></span>
+        <span><strong style="color: #d17a3f;">Nữ:</strong> <span id="stat-nu">0</span></span>
         <span><strong style="color: #0081a7;">Bệnh nhân ≥ 60 tuổi:</strong> <span id="stat-60">0</span></span>
-    </div>
-
-    <div class="age-gender-stats">
-        <div><strong>Tổng số người ≥ 60 tuổi:</strong> <span class="age-badge" id="detail-age-total">0</span></div>
-        <div>👥 Phân tách: &nbsp;&nbsp;&nbsp; 👨 <strong>Nam:</strong> <span id="detail-age-nam">0</span> &nbsp;&nbsp;|&nbsp;&nbsp; 👩 <strong>Nữ:</strong> <span id="detail-age-nu">0</span></div>
+        <span>👥 Phân tách (≥ 60 tuổi): &nbsp; 👨 <strong>Nam:</strong> <span id="detail-age-nam">0</span> &nbsp;|&nbsp; 👩 <strong>Nữ:</strong> <span id="detail-age-nu">0</span></span>
     </div>
 
     <div class="clear-float">
@@ -166,7 +159,7 @@
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('detailModal')">&times;</span>
-            <h3 style="margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 8px; color: #2c3e50; font-size: 16px;">HỒ SƠ BỆNH ÁN CHI TIẾT</h3>
+            <h3 style="margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 4px; color: #2c3e50; font-size: 14px;">HỒ SƠ BỆNH ÁN CHI TIẾT</h3>
             <div class="modal-info" id="modal-patient-info"></div>
         </div>
     </div>
@@ -174,7 +167,7 @@
     <div id="formModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('formModal')">&times;</span>
-            <h3 id="modal-title" style="margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 8px; color: #2c3e50; font-size: 16px;">THÊM BỆNH NHÂN MỚI</h3>
+            <h3 id="modal-title" style="margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 4px; color: #2c3e50; font-size: 14px;">THÊM BỆNH NHÂN MỚI</h3>
             
             <input type="hidden" id="p-id" />
             
@@ -206,8 +199,8 @@
                 <input type="number" id="p-sodot" value="1" min="1" onchange="toggleLoteFields()" />
             </div>
             
-            <div id="dot-dynamic-fields" style="background: #f1f3f5; padding: 12px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #ccc;">
-                <h4 style="font-size: 13px; margin-bottom: 8px; color: #333; border-bottom: 1px dashed #aaa; padding-bottom: 4px;">Thông tin đợt điều trị <span id="lbl-dot-num">1</span></h4>
+            <div id="dot-dynamic-fields" style="background: #f1f3f5; padding: 8px; border-radius: 6px; margin-bottom: 8px; border: 1px solid #ccc;">
+                <h4 style="font-size: 12px; margin-bottom: 4px; color: #333; border-bottom: 1px dashed #aaa; padding-bottom: 2px;">Thông tin đợt điều trị <span id="lbl-dot-num">1</span></h4>
                 <div class="form-group">
                     <label>Ngày nhập trung tâm:</label>
                     <input type="text" id="p-nhapam" placeholder="DD/MM/YYYY hoặc —" />
@@ -234,12 +227,12 @@
                 </select>
             </div>
             
-            <button class="btn" style="background-color: #28a745; color: white; width: 100%; padding: 10px; font-size: 14px; border-radius: 6px;" onclick="savePatient()">Lưu thông tin</button>
+            <button class="btn" style="background-color: #28a745; color: white; width: 100%; padding: 8px; font-size: 13px; border-radius: 6px;" onclick="savePatient()">Lưu thông tin</button>
         </div>
     </div>
 
     <script>
-        // --------- CẤU HÌNH DỰ ÁN CỦA BẠN TỪ FIREBASE ---------
+        // --------- CẤU HÌNH FIREBASE CỦA BẠN ---------
         const firebaseConfig = {
             apiKey: "AIzaSyAIMaHA9RntQ3pxXjOD001Ldh1c1qpseGU",
             authDomain: "ql-bnnoitru.firebaseapp.com",
@@ -251,7 +244,7 @@
             measurementId: "G-M8LP1TBEJ8"
         };
 
-        // Khởi tạo Firebase
+        // Khởi tạo Firebase tránh lỗi khởi tạo nhiều lần
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         } else {
@@ -265,13 +258,16 @@
         let isUserAdmin = false;
         let currentFilter = "all";
 
-        // Lắng nghe dữ liệu realtime từ Firebase (Đồng bộ mọi thiết bị tự động)
+        // Lắng nghe dữ liệu Realtime Database
         database.ref('patients').on('value', (snapshot) => {
             patientsData = [];
             const data = snapshot.val();
             if (data) {
+                // Đảm bảo lấy đúng các key sạch của bảng ghi, tránh lặp bản ghi
                 Object.keys(data).forEach(key => {
-                    patientsData.push(data[key]);
+                    if (data[key] && data[key].id) {
+                        patientsData.push(data[key]);
+                    }
                 });
             }
             renderDashboard();
@@ -320,7 +316,7 @@
             const tbody = document.getElementById('patient-list');
             tbody.innerHTML = '';
 
-            // 1. Đếm thẻ trạng thái tổng quan
+            // 1. Đếm số lượng thẻ tổng
             let total = patientsData.length;
             let treating = patientsData.filter(p => p.trang_thai === "Nằm viện").length;
             let discharged = patientsData.filter(p => p.trang_thai === "Đã về").length;
@@ -331,13 +327,13 @@
             document.getElementById('discharged-patients').innerText = discharged;
             document.getElementById('dead-patients').innerText = dead;
 
-            // 2. Lọc mảng dữ liệu dựa theo ô trạng thái (bấm chọn)
+            // 2. Lọc danh sách theo trạng thái bấm chọn
             let dataToRender = patientsData;
             if (currentFilter !== "all") {
                 dataToRender = patientsData.filter(p => p.trang_thai === currentFilter);
             }
 
-            // 3. Tính toán số liệu mở rộng theo danh sách ĐANG LỌC
+            // 3. Cập nhật thống kê mở rộng (Theo danh sách lọc)
             let namFiltered = dataToRender.filter(p => p.gioi_tinh === "Nam").length;
             let nuFiltered = dataToRender.filter(p => p.gioi_tinh === "Nữ").length;
             let tuoi60Filtered = dataToRender.filter(p => (2026 - p.nam_sinh) >= 60).length;
@@ -348,8 +344,6 @@
             document.getElementById('stat-nam').innerText = namFiltered;
             document.getElementById('stat-nu').innerText = nuFiltered;
             document.getElementById('stat-60').innerText = tuoi60Filtered;
-
-            document.getElementById('detail-age-total').innerText = tuoi60Filtered;
             document.getElementById('detail-age-nam').innerText = age60NamFiltered;
             document.getElementById('detail-age-nu').innerText = age60NuFiltered;
 
@@ -428,9 +422,9 @@
                 <p><span>Số thẻ BHYT:</span> ${currentBHYT}</p>
                 <p><span>Tổng số đợt điều trị:</span> ${p.so_dot} đợt</p>
                 <p><span>Trạng thái tổng thể:</span> ${currentTrangThai}</p>
-                <p style="margin-top:8px; border-top:1px dashed #ccc; padding-top:8px;">
+                <p style="margin-top:6px; border-top:1px dashed #ccc; padding-top:6px;">
                     <span>Lịch sử thời gian & diễn biến các đợt điều trị:</span>
-                    <div style="margin-top:8px; max-height: 250px; overflow-y:auto;">${historyHTML}</div>
+                    <div style="margin-top:5px; max-height: 200px; overflow-y:auto;">${historyHTML}</div>
                 </p>
             `;
             document.getElementById('detailModal').style.display = 'flex';
@@ -541,11 +535,13 @@
                         lich_su_dot: newLichSu
                     };
 
+                    // Sử dụng ID chuẩn để set
                     database.ref('patients/' + id).set(updatedPatient);
                     patientsData[index] = updatedPatient;
                 }
                 alert("Cập nhật thông tin hồ sơ bệnh nhân thành công!");
             } else {
+                // Tạo ID duy nhất dựa trên thời gian thực
                 const newId = Date.now();
                 const newLichSu = [{
                     dot: 1,
@@ -567,19 +563,21 @@
                     lich_su_dot: newLichSu
                 };
 
+                // Tránh ghi đè hoặc phát sinh chuỗi rác
                 database.ref('patients/' + newId).set(newPatient);
                 patientsData.push(newPatient);
                 alert("Thêm mới bệnh nhân thành công!");
             }
 
             closeModal('formModal');
-            renderDashboard(); // Vẽ lại bảng ngay lập tức tránh độ trễ đồng bộ mạng
+            renderDashboard();
         }
 
         function deletePatient(id) {
             if(confirm("Bạn có chắc chắn muốn xóa hồ sơ bệnh nhân này không? Thao tác này không thể hoàn tác!")) {
+                // Xóa đúng node trên Firebase
                 database.ref('patients/' + id).remove();
-                patientsData = patientsData.filter(item => item.id !== id);
+                patientsData = patientsData.filter(item => item.id !== parseInt(id));
                 renderDashboard();
             }
         }
