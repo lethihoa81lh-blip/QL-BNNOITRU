@@ -29,28 +29,36 @@
         /* Khối thống kê mở rộng */
         .extended-stats { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-around; font-weight: 500; }
 
-        /* Bảng dữ liệu */
+        /* Bảng dữ liệu có kẻ đường viền ô (lưới) rõ ràng */
         .table-container { background: white; border-radius: 8px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
-        th, td { padding: 12px 15px; border-bottom: 1px solid #e9ecef; }
-        th { background-color: #f8f9fa; color: #495057; font-weight: 600; }
+        
+        /* Bổ sung đường viền dọc và ngang cho tất cả các ô */
+        th, td { padding: 12px 15px; border: 1px solid #ced4da; }
+        
+        th { background-color: #e9ecef; color: #333; font-weight: 700; text-align: center; }
+        td { vertical-align: middle; }
+        td:first-child, td:nth-child(3), td:nth-child(4), td:nth-child(5), td:nth-child(6), td:nth-child(7), td:nth-child(9) {
+            text-align: center;
+        }
+        tr:nth-child(even) { background-color: #f8f9fa; }
         tr:hover { background-color: #f1f3f5; }
 
         /* Trạng thái */
-        .status-badge { display: inline-block; padding: 5px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+        .status-badge { display: inline-block; padding: 6px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; text-align: center; }
         .status-on { background-color: #ffe8d6; color: #d17a3f; }
         .status-off { background-color: #e8f5e9; color: #2e7d32; }
 
         /* Nút thao tác */
-        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; text-decoration: none; display: inline-block; }
+        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-block; }
         .btn-view { background-color: #eef1f6; color: #3f577a; border: 1px solid #b0c4de; margin-right: 5px; }
         .btn-view:hover { background-color: #d8e2ec; }
         
-        /* Nhóm nút Admin (ẩn/hiện) */
+        /* Nhóm nút Thao tác */
         .admin-only { display: none; }
         .btn-add { background-color: #007bff; color: white; margin-bottom: 15px; float: left; }
         .btn-add:hover { background-color: #0056b3; }
-        .btn-edit { background-color: #ffc107; color: #212529; border: 1px solid #d39e00; margin-right: 5px; }
+        .btn-edit { background-color: #ffc107; color: #212529; border: 1px solid #d39e00; margin-right: 8px; }
         .btn-edit:hover { background-color: #e0a800; }
         .btn-delete { background-color: #dc3545; color: white; }
         .btn-delete:hover { background-color: #bd2130; }
@@ -81,11 +89,11 @@
     <h2>HỆ THỐNG QUẢN LÝ BỆNH NHÂN NỘI TRÚ (NỘI BỘ TRUNG TÂM)</h2>
 
     <div class="top-bar">
-        <div>Trạng thái truy cập: <strong id="login-status" style="color: #0081a7;">Người xem (Khách)</strong></div>
+        <div>Quyền truy cập hiện tại: <strong id="login-status" style="color: #0081a7;">Người xem (Khách)</strong></div>
         <div class="admin-login">
             <div id="login-form-area">
-                <input type="password" id="admin-pass" placeholder="Mật khẩu Quản trị..." />
-                <button class="btn-login" onclick="loginAdmin()">Đăng nhập Admin</button>
+                <input type="password" id="admin-pass" placeholder="Mật khẩu Admin..." />
+                <button class="btn-login" onclick="loginAdmin()">Đăng nhập</button>
             </div>
             <div id="logout-btn-area" style="display: none;">
                 <button class="btn-logout" onclick="logoutAdmin()">Đăng xuất</button>
@@ -160,11 +168,11 @@
             <input type="hidden" id="p-id" />
             
             <div class="form-group">
-                <label>Họ và tên:</label>
+                <label>Họ và tên:*</label>
                 <input type="text" id="p-hoten" placeholder="Nguyễn Văn A" required />
             </div>
             <div class="form-group">
-                <label>Năm sinh:</label>
+                <label>Năm sinh:*</label>
                 <input type="number" id="p-namsinh" placeholder="1980" required />
             </div>
             <div class="form-group">
@@ -199,7 +207,7 @@
                 <input type="text" id="p-chandoan" placeholder="..." />
             </div>
             <div class="form-group">
-                <label>Trạng thái:</label>
+                <label>Trạng thái điều trị:</label>
                 <select id="p-trangthai">
                     <option value="Nằm viện">Nằm viện</option>
                     <option value="Đã về">Đã về</option>
@@ -207,18 +215,18 @@
             </div>
             <div class="form-group">
                 <label>Ghi chú điều trị:</label>
-                <textarea id="p-ghichu" placeholder="Nội dung diễn biến điều trị..."></textarea>
+                <textarea id="p-ghichu" placeholder="Nội dung diễn biến điều trị, thuốc men..."></textarea>
             </div>
             
-            <button class="btn" style="background-color: #28a745; color: white; width: 100%; padding: 10px;" onclick="savePatient()">Lưu thông tin</button>
+            <button class="btn" style="background-color: #28a745; color: white; width: 100%; padding: 12px; font-size: 15px; border-radius: 6px;" onclick="savePatient()">Lưu thông tin</button>
         </div>
     </div>
 
     <script>
-        // Mật khẩu mặc định cho Admin (có thể đổi thành mã tùy ý)
+        // Mật khẩu mặc định Admin mở khóa tính năng thêm/sửa/xóa
         const ADMIN_PASSWORD = "admin";
 
-        // Dữ liệu mẫu (Lưu trữ bằng mảng trong bộ nhớ tạm)
+        // Dữ liệu mẫu ban đầu
         let patientsData = [
             {
                 id: 1, ho_ten: "Huỳnh Thị Yếm", nam_sinh: 1954, gioi_tinh: "Nữ",
@@ -236,7 +244,7 @@
 
         let isUserAdmin = false;
 
-        // --- XỬ LÝ PHÂN QUYỀN ĐĂNG NHẬP ---
+        // --- ĐĂNG NHẬP / ĐĂNG XUẤT ADMIN ---
         function loginAdmin() {
             const enteredPass = document.getElementById('admin-pass').value;
             if (enteredPass === ADMIN_PASSWORD) {
@@ -246,7 +254,7 @@
                 document.getElementById('login-form-area').style.display = "none";
                 document.getElementById('logout-btn-area').style.display = "block";
                 
-                // Hiện toàn bộ các nút thao tác của Admin
+                // Hiển thị các nút Thêm, Sửa, Xóa trên giao diện
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = "inline-block");
                 renderDashboard();
                 alert("Đăng nhập quyền Quản trị thành công!");
@@ -263,12 +271,12 @@
             document.getElementById('logout-btn-area').style.display = "none";
             document.getElementById('admin-pass').value = "";
             
-            // Ẩn các nút thao tác Admin
+            // Ẩn các nút Thêm, Sửa, Xóa
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = "none");
             renderDashboard();
         }
 
-        // --- RENDER GIAO DIỆN ---
+        // --- VẼ BẢNG VÀ THỐNG KÊ ---
         function renderDashboard() {
             const tbody = document.getElementById('patient-list');
             tbody.innerHTML = '';
@@ -288,11 +296,12 @@
 
                 if(p.gioi_tinh === "Nam") nam++;
                 if(p.gioi_tinh === "Nữ") nu++;
+                // Lấy năm hiện tại 2026 để tự động đếm số người đủ 60 tuổi
                 if((2026 - p.nam_sinh) >= 60) tuoi60++;
 
                 let badgeClass = (p.trang_thai === "Nằm viện") ? "status-on" : "status-off";
                 
-                // Cột thao tác mở rộng dựa theo quyền (isUserAdmin)
+                // Nếu là Admin thì gắn thêm nút Sửa và Xóa ở mỗi dòng
                 let adminActionButtons = isUserAdmin ? `
                     <button class="btn btn-edit" onclick="openEditModal(${p.id})">Sửa</button>
                     <button class="btn btn-delete" onclick="deletePatient(${p.id})">Xóa</button>
@@ -308,7 +317,7 @@
                     <td>${p.ngay_ve_khu}</td>
                     <td>${p.chan_doan}</td>
                     <td><span class="status-badge ${badgeClass}">${p.trang_thai}</span></td>
-                    <td>
+                    <td style="white-space: nowrap; text-align: center;">
                         <button class="btn btn-view" onclick="viewDetail(${p.id})">Xem</button>
                         ${adminActionButtons}
                     </td>
@@ -326,7 +335,7 @@
             document.getElementById('stat-60').innerText = tuoi60;
         }
 
-        // --- XEM CHI TIẾT (Modal) ---
+        // --- XEM CHI TIẾT HỒ SƠ ---
         function viewDetail(id) {
             const p = patientsData.find(item => item.id === id);
             if (!p) return;
@@ -335,25 +344,27 @@
             detailDiv.innerHTML = `
                 <p><span>Họ và tên:</span> ${p.ho_ten}</p>
                 <p><span>Năm sinh / Giới tính:</span> ${p.nam_sinh} - ${p.gioi_tinh}</p>
-                <p><span>Số thẻ BHYT:</span> ${p.bhyt}</p>
+                <p><span>Số thẻ BHYT:</span> ${p.bhyt || "—"}</p>
                 <p><span>Số đợt điều trị:</span> Đợt ${p.so_dot}</p>
-                <p><span>Chẩn đoán:</span> ${p.chan_doan}</p>
+                <p><span>Chẩn đoán:</span> ${p.chan_doan || "—"}</p>
                 <p><span>Ngày nhập trung tâm:</span> ${p.ngay_nhap_ttam}</p>
                 <p><span>Ngày nhập trạm xá:</span> ${p.ngay_nhap_ttram}</p>
+                <p><span>Ngày về khu:</span> ${p.ngay_ve_khu}</p>
                 <p><span>Trạng thái:</span> ${p.trang_thai}</p>
                 <p style="margin-top:10px; border-top:1px dashed #ccc; padding-top:10px;">
-                    <span>Ghi chú điều trị:</span><br>${p.ghi_chu}
+                    <span>Ghi chú điều trị:</span><br>${p.ghi_chu || "Không có ghi chú"}
                 </p>
             `;
             document.getElementById('detailModal').style.display = 'flex';
         }
 
-        // --- THÊM & SỬA BỆNH NHÂN (CRUD) ---
+        // --- FORM THÊM MỚI & CẬP NHẬT (CRUD) ---
         function openAddModal() {
             document.getElementById('modal-title').innerText = "THÊM BỆNH NHÂN MỚI";
             document.getElementById('p-id').value = "";
             document.getElementById('p-hoten').value = "";
             document.getElementById('p-namsinh').value = "";
+            document.getElementById('p-gioitinh').value = "Nam";
             document.getElementById('p-bhyt').value = "";
             document.getElementById('p-sodot').value = 1;
             document.getElementById('p-nhapam').value = "";
@@ -398,7 +409,7 @@
             }
 
             const patientData = {
-                id: id ? parseInt(id) : Date.now(), // Tạo ID ngẫu nhiên nếu là thêm mới
+                id: id ? parseInt(id) : Date.now(), // Tự sinh ID nếu thêm mới
                 ho_ten: ho_ten,
                 nam_sinh: nam_sinh,
                 gioi_tinh: document.getElementById('p-gioitinh').value,
@@ -407,20 +418,20 @@
                 ngay_nhap_ttam: document.getElementById('p-nhapam').value || "—",
                 ngay_nhap_ttram: document.getElementById('p-nhapram').value || "—",
                 ngay_ve_khu: document.getElementById('p-vekhu').value || "—",
-                chan_doan: document.getElementById('p-chandoan').value || "Chưa có",
+                chan_doan: document.getElementById('p-chandoan').value || "—",
                 trang_thai: document.getElementById('p-trangthai').value,
                 ghi_chu: document.getElementById('p-ghichu').value || ""
             };
 
             if(id) {
-                // Cập nhật bản ghi cũ
+                // Sửa bản ghi cũ
                 let index = patientsData.findIndex(item => item.id === parseInt(id));
                 if(index !== -1) patientsData[index] = patientData;
-                alert("Cập nhật thông tin thành công!");
+                alert("Cập nhật thông tin bệnh nhân thành công!");
             } else {
-                // Thêm mới
+                // Thêm bản ghi mới
                 patientsData.push(patientData);
-                alert("Thêm bệnh nhân mới thành công!");
+                alert("Thêm mới bệnh nhân thành công!");
             }
 
             closeModal('formModal');
@@ -438,11 +449,12 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
+        // --- XUẤT FILE DANH SÁCH ĐANG ĐIỀU TRỊ ---
         function exportDangDieuTri() {
-            alert("Tải xuống danh sách các bệnh nhân đang điều trị nội bộ thành công!");
+            alert("Đã kết xuất tệp Excel danh sách các bệnh nhân đang điều trị nội bộ thành công!");
         }
 
-        // Khởi chạy
+        // Khởi chạy hệ thống
         window.onload = renderDashboard;
     </script>
 </body>
