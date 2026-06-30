@@ -9,20 +9,27 @@
         body { padding: 20px; background-color: #f4f7f6; }
         h2 { color: #333; margin-bottom: 15px; text-align: center; font-size: 22px; }
         
-        /* Khu vực điều hướng & Đăng nhập */
+        /* Thanh điều hướng & Đăng nhập */
         .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-size: 14px; }
         .admin-login { display: flex; gap: 10px; align-items: center; }
         .admin-login input { padding: 6px 10px; border: 1px solid #ccc; border-radius: 4px; }
         .btn-login { background-color: #4a6fa5; color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; }
         .btn-logout { background-color: #6c757d; color: white; border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; }
 
-        /* Khu vực thống kê (Đã gom nhỏ gọn gàng) */
+        /* Khu vực Thống kê Tương tác (Có thể bấm vào để lọc) */
         .stats-container { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .stat-box { flex: 1; min-width: 150px; background: white; padding: 12px; border-radius: 6px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #4a6fa5; }
+        .stat-box { flex: 1; min-width: 150px; background: white; padding: 12px; border-radius: 6px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #4a6fa5; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .stat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .stat-box.active { border-width: 6px; background-color: #fafbfc; }
         .stat-box h4 { font-size: 12px; color: #6c757d; text-transform: uppercase; margin-bottom: 4px; }
         .stat-box p { font-size: 20px; font-weight: bold; color: #333; }
 
         .extended-stats { background: white; padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); display: flex; justify-content: space-around; font-size: 13px; }
+
+        /* Bổ sung khối Thống kê Chuyên sâu Tuổi & Giới tính */
+        .age-gender-stats { background: #eef1f6; border: 2px solid #b0c4de; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-around; align-items: center; font-size: 14px; }
+        .age-gender-stats strong { color: #2c3e50; }
+        .age-badge { background-color: #3f577a; color: white; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
 
         /* Bảng dữ liệu có đường viền lưới rõ ràng */
         .table-container { background: white; border-radius: 8px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 15px; }
@@ -75,6 +82,7 @@
 
         .modal-info { margin-bottom: 10px; line-height: 1.5; font-size: 14px; }
         .modal-info span { font-weight: bold; color: #333; }
+        .history-list { margin-top: 5px; padding-left: 15px; font-size: 13px; color: #444; }
     </style>
 </head>
 <body>
@@ -95,15 +103,15 @@
     </div>
 
     <div class="stats-container">
-        <div class="stat-box" style="border-left-color: #4a6fa5;">
+        <div class="stat-box" id="filter-all" onclick="setFilter('all')" style="border-left-color: #4a6fa5;">
             <h4>TỔNG BỆNH NHÂN</h4>
             <p id="total-patients">0</p>
         </div>
-        <div class="stat-box" style="border-left-color: #f07167;">
+        <div class="stat-box" id="filter-treating" onclick="setFilter('Nằm viện')" style="border-left-color: #f07167;">
             <h4>ĐANG ĐIỀU TRỊ</h4>
             <p id="treating-patients">0</p>
         </div>
-        <div class="stat-box" style="border-left-color: #0081a7;">
+        <div class="stat-box" id="filter-discharged" onclick="setFilter('Đã về')" style="border-left-color: #0081a7;">
             <h4>ĐÃ XUẤT VIỆN</h4>
             <p id="discharged-patients">0</p>
         </div>
@@ -116,7 +124,12 @@
     <div class="extended-stats">
         <span><strong style="color: #4a6fa5;">Số lượng Nam:</strong> <span id="stat-nam">0</span></span>
         <span><strong style="color: #d17a3f;">Số lượng Nữ:</strong> <span id="stat-nu">0</span></span>
-        <span><strong style="color: #0081a7;">Bệnh nhân đủ 60 tuổi (≥ 60):</strong> <span id="stat-60">0</span></span>
+        <span><strong style="color: #0081a7;">Bệnh nhân ≥ 60 tuổi:</strong> <span id="stat-60">0</span></span>
+    </div>
+
+    <div class="age-gender-stats">
+        <div><strong>Tổng số người ≥ 60 tuổi:</strong> <span class="age-badge" id="detail-age-total">0</span></div>
+        <div>👥 Phân tách: &nbsp;&nbsp;&nbsp; 👨 **Nam:** <span id="detail-age-nam">0</span> &nbsp;&nbsp;|&nbsp;&nbsp; 👩 **Nữ:** <span id="detail-age-nu">0</span></div>
     </div>
 
     <div class="clear-float">
@@ -180,8 +193,12 @@
                 <input type="text" id="p-bhyt" placeholder="BT..." />
             </div>
             <div class="form-group">
-                <label>Số đợt điều trị:</label>
+                <label>Số đợt điều trị (Hiện tại):</label>
                 <input type="number" id="p-sodot" value="1" min="1" />
+            </div>
+            <div class="form-group">
+                <label>Ghi chú đợt điều trị mới / bổ sung:</label>
+                <textarea id="p-ghichu-moi" placeholder="Nội dung diễn biến điều trị đợt này..."></textarea>
             </div>
             <div class="form-group">
                 <label>Ngày nhập trung tâm:</label>
@@ -206,17 +223,13 @@
                     <option value="Đã về">Đã về</option>
                 </select>
             </div>
-            <div class="form-group">
-                <label>Ghi chú điều trị:</label>
-                <textarea id="p-ghichu" placeholder="Nội dung diễn biến điều trị, thuốc men..."></textarea>
-            </div>
             
             <button class="btn" style="background-color: #28a745; color: white; width: 100%; padding: 10px; font-size: 14px; border-radius: 6px;" onclick="savePatient()">Lưu thông tin</button>
         </div>
     </div>
 
     <script>
-        // Mật khẩu mặc định Admin mở khóa tính năng thêm/sửa/xóa
+        // Mật khẩu mặc định Admin
         const ADMIN_PASSWORD = "admin";
 
         // Dữ liệu mẫu ban đầu
@@ -225,19 +238,27 @@
                 id: 1, ho_ten: "Huỳnh Thị Yếm", nam_sinh: 1954, gioi_tinh: "Nữ",
                 ngay_nhap_ttram: "18/06/2026", ngay_nhap_ttam: "19/06/2026", ngay_ve_khu: "25/06/2026",
                 chan_doan: "Chấn thương cổ tay / lão suy", trang_thai: "Đã về", so_dot: 1,
-                bhyt: "BT2797933840851", ghi_chu: "Bệnh nhân ổn định, tiếp tục theo dõi ngoại trú tại khu."
+                bhyt: "BT2797933840851", 
+                lich_su_dot: [
+                    { dot: 1, ghi_chu: "Bệnh nhân ổn định, tiếp tục theo dõi ngoại trú tại khu." }
+                ]
             },
             {
                 id: 2, ho_ten: "Nguyễn Thành Được", nam_sinh: 1989, gioi_tinh: "Nam",
                 ngay_nhap_ttram: "20/06/2026", ngay_nhap_ttam: "21/06/2026", ngay_ve_khu: "—",
                 chan_doan: "Lao phổi / HIV", trang_thai: "Nằm viện", so_dot: 3,
-                bhyt: "BT2797933840852", ghi_chu: "Đang điều trị phác đồ chống lao kết hợp ARV."
+                bhyt: "BT2797933840852", 
+                lich_su_dot: [
+                    { dot: 1, ghi_chu: "Nhập viện đợt 1, thể trạng yếu." },
+                    { dot: 2, ghi_chu: "Tái khám đợt 2, ho giảm." },
+                    { dot: 3, ghi_chu: "Đang điều trị phác đồ chống lao kết hợp ARV." }
+                ]
             }
         ];
 
         let isUserAdmin = false;
+        let currentFilter = "all";
 
-        // --- ĐĂNG NHẬP / ĐĂNG XUẤT ADMIN ---
         function loginAdmin() {
             const enteredPass = document.getElementById('admin-pass').value;
             if (enteredPass === ADMIN_PASSWORD) {
@@ -247,7 +268,6 @@
                 document.getElementById('login-form-area').style.display = "none";
                 document.getElementById('logout-btn-area').style.display = "block";
                 
-                // Hiển thị các nút Thêm, Sửa, Xóa trên giao diện
                 document.querySelectorAll('.admin-only').forEach(el => el.style.display = "inline-block");
                 renderDashboard();
                 alert("Đăng nhập quyền Quản trị thành công!");
@@ -264,37 +284,58 @@
             document.getElementById('logout-btn-area').style.display = "none";
             document.getElementById('admin-pass').value = "";
             
-            // Ẩn các nút Thêm, Sửa, Xóa
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = "none");
             renderDashboard();
         }
 
-        // --- VẼ BẢNG VÀ THỐNG KÊ ---
+        function setFilter(status) {
+            currentFilter = status;
+            document.querySelectorAll('.stat-box').forEach(el => el.classList.remove('active'));
+            if(status === 'all') document.getElementById('filter-all').classList.add('active');
+            else if(status === 'Nằm viện') document.getElementById('filter-treating').classList.add('active');
+            else if(status === 'Đã về') document.getElementById('filter-discharged').classList.add('active');
+
+            renderDashboard();
+        }
+
         function renderDashboard() {
             const tbody = document.getElementById('patient-list');
             tbody.innerHTML = '';
 
             let total = patientsData.length;
-            let treating = 0;
-            let discharged = 0;
-            let dead = 0;
-            let nam = 0;
-            let nu = 0;
-            let tuoi60 = 0;
+            let treating = patientsData.filter(p => p.trang_thai === "Nằm viện").length;
+            let discharged = patientsData.filter(p => p.trang_thai === "Đã về").length;
+            let dead = patientsData.filter(p => p.trang_thai === "Tử vong").length;
 
-            patientsData.forEach((p, index) => {
-                if(p.trang_thai === "Nằm viện") treating++;
-                else if(p.trang_thai === "Đã về") discharged++;
-                else dead++;
+            let nam = patientsData.filter(p => p.gioi_tinh === "Nam").length;
+            let nu = patientsData.filter(p => p.gioi_tinh === "Nữ").length;
+            let tuoi60 = patientsData.filter(p => (2026 - p.nam_sinh) >= 60).length;
 
-                if(p.gioi_tinh === "Nam") nam++;
-                if(p.gioi_tinh === "Nữ") nu++;
-                // Lấy năm hiện tại 2026 để tự động đếm số người đủ 60 tuổi
-                if((2026 - p.nam_sinh) >= 60) tuoi60++;
+            // Bóc tách chi tiết bệnh nhân từ 60 tuổi trở lên theo giới tính
+            let age60Nam = patientsData.filter(p => (2026 - p.nam_sinh) >= 60 && p.gioi_tinh === "Nam").length;
+            let age60Nu = patientsData.filter(p => (2026 - p.nam_sinh) >= 60 && p.gioi_tinh === "Nữ").length;
 
+            document.getElementById('total-patients').innerText = total;
+            document.getElementById('treating-patients').innerText = treating;
+            document.getElementById('discharged-patients').innerText = discharged;
+            document.getElementById('dead-patients').innerText = dead;
+
+            document.getElementById('stat-nam').innerText = nam;
+            document.getElementById('stat-nu').innerText = nu;
+            document.getElementById('stat-60').innerText = tuoi60;
+
+            // Cập nhật khối chuyên sâu tuổi & giới tính
+            document.getElementById('detail-age-total').innerText = tuoi60;
+            document.getElementById('detail-age-nam').innerText = age60Nam;
+            document.getElementById('detail-age-nu').innerText = age60Nu;
+
+            let dataToRender = patientsData;
+            if (currentFilter !== "all") {
+                dataToRender = patientsData.filter(p => p.trang_thai === currentFilter);
+            }
+
+            dataToRender.forEach((p, index) => {
                 let badgeClass = (p.trang_thai === "Nằm viện") ? "status-on" : "status-off";
-                
-                // Nếu là Admin thì gắn thêm nút Sửa và Xóa ở mỗi dòng
                 let adminActionButtons = isUserAdmin ? `
                     <button class="btn btn-edit" onclick="openEditModal(${p.id})">Sửa</button>
                     <button class="btn btn-delete" onclick="deletePatient(${p.id})">Xóa</button>
@@ -317,41 +358,40 @@
                 </tr>`;
                 tbody.innerHTML += row;
             });
-
-            document.getElementById('total-patients').innerText = total;
-            document.getElementById('treating-patients').innerText = treating;
-            document.getElementById('discharged-patients').innerText = discharged;
-            document.getElementById('dead-patients').innerText = dead;
-
-            document.getElementById('stat-nam').innerText = nam;
-            document.getElementById('stat-nu').innerText = nu;
-            document.getElementById('stat-60').innerText = tuoi60;
         }
 
-        // --- XEM CHI TIẾT HỒ SƠ ---
         function viewDetail(id) {
             const p = patientsData.find(item => item.id === id);
             if (!p) return;
+
+            let historyHTML = "";
+            if (p.lich_su_dot && p.lich_su_dot.length > 0) {
+                historyHTML = p.lich_su_dot.map(item => `
+                    <li style="margin-bottom: 5px;"><strong>Đợt ${item.dot}:</strong> ${item.ghi_chu}</li>
+                `).join('');
+            } else {
+                historyHTML = `<li>Chưa có diễn biến lịch sử điều trị.</li>`;
+            }
 
             const detailDiv = document.getElementById('modal-patient-info');
             detailDiv.innerHTML = `
                 <p><span>Họ và tên:</span> ${p.ho_ten}</p>
                 <p><span>Năm sinh / Giới tính:</span> ${p.nam_sinh} - ${p.gioi_tinh}</p>
                 <p><span>Số thẻ BHYT:</span> ${p.bhyt || "—"}</p>
-                <p><span>Số đợt điều trị:</span> Đợt ${p.so_dot}</p>
+                <p><span>Số đợt điều trị hiện tại:</span> Đợt ${p.so_dot}</p>
                 <p><span>Chẩn đoán:</span> ${p.chan_doan || "—"}</p>
                 <p><span>Ngày nhập trung tâm:</span> ${p.ngay_nhap_ttam}</p>
                 <p><span>Ngày nhập trạm xá:</span> ${p.ngay_nhap_ttram}</p>
-                <p><span>Ngày về khu:</span> ${p.ngay_ve_khu}</p>
+                <p><span>Ngày về khu:</span> ${p.ve_khu || p.ngay_ve_khu}</p>
                 <p><span>Trạng thái:</span> ${p.trang_thai}</p>
                 <p style="margin-top:8px; border-top:1px dashed #ccc; padding-top:8px;">
-                    <span>Ghi chú điều trị:</span><br>${p.ghi_chu || "Không có ghi chú"}
+                    <span>Nhật ký điều trị (Lịch sử các đợt):</span>
+                    <ul class="history-list">${historyHTML}</ul>
                 </p>
             `;
             document.getElementById('detailModal').style.display = 'flex';
         }
 
-        // --- FORM THÊM MỚI & CẬP NHẬT (CRUD) ---
         function openAddModal() {
             document.getElementById('modal-title').innerText = "THÊM BỆNH NHÂN MỚI";
             document.getElementById('p-id').value = "";
@@ -360,12 +400,12 @@
             document.getElementById('p-gioitinh').value = "Nam";
             document.getElementById('p-bhyt').value = "";
             document.getElementById('p-sodot').value = 1;
+            document.getElementById('p-ghichu-moi').value = "";
             document.getElementById('p-nhapam').value = "";
             document.getElementById('p-nhapram').value = "";
             document.getElementById('p-vekhu').value = "";
             document.getElementById('p-chandoan').value = "";
             document.getElementById('p-trangthai').value = "Nằm viện";
-            document.getElementById('p-ghichu').value = "";
             
             document.getElementById('formModal').style.display = 'flex';
         }
@@ -386,7 +426,8 @@
             document.getElementById('p-vekhu').value = p.ngay_ve_khu;
             document.getElementById('p-chandoan').value = p.chan_doan;
             document.getElementById('p-trangthai').value = p.trang_thai;
-            document.getElementById('p-ghichu').value = p.ghi_chu;
+            
+            document.getElementById('p-ghichu-moi').value = "";
 
             document.getElementById('formModal').style.display = 'flex';
         }
@@ -395,35 +436,71 @@
             const id = document.getElementById('p-id').value;
             const ho_ten = document.getElementById('p-hoten').value;
             const nam_sinh = parseInt(document.getElementById('p-namsinh').value);
+            const so_dot_moi = parseInt(document.getElementById('p-sodot').value) || 1;
+            const ghi_chu_moi = document.getElementById('p-ghichu-moi').value;
 
             if(!ho_ten || isNaN(nam_sinh)) {
                 alert("Vui lòng điền đầy đủ Họ và tên, Năm sinh hợp lệ!");
                 return;
             }
 
-            const patientData = {
-                id: id ? parseInt(id) : Date.now(), // Tự sinh ID nếu thêm mới
-                ho_ten: ho_ten,
-                nam_sinh: nam_sinh,
-                gioi_tinh: document.getElementById('p-gioitinh').value,
-                bhyt: document.getElementById('p-bhyt').value,
-                so_dot: parseInt(document.getElementById('p-sodot').value) || 1,
-                ngay_nhap_ttam: document.getElementById('p-nhapam').value || "—",
-                ngay_nhap_ttram: document.getElementById('p-nhapram').value || "—",
-                ngay_ve_khu: document.getElementById('p-vekhu').value || "—",
-                chan_doan: document.getElementById('p-chandoan').value || "—",
-                trang_thai: document.getElementById('p-trangthai').value,
-                ghi_chu: document.getElementById('p-ghichu').value || ""
-            };
-
             if(id) {
-                // Sửa bản ghi cũ
                 let index = patientsData.findIndex(item => item.id === parseInt(id));
-                if(index !== -1) patientsData[index] = patientData;
-                alert("Cập nhật thông tin bệnh nhân thành công!");
+                if(index !== -1) {
+                    let oldRecord = patientsData[index];
+                    if(!oldRecord.lich_su_dot) oldRecord.lich_su_dot = [];
+
+                    if (so_dot_moi > oldRecord.so_dot && ghi_chu_moi.trim() !== "") {
+                        oldRecord.lich_su_dot.push({
+                            dot: so_dot_moi,
+                            ghi_chu: ghi_chu_moi
+                        });
+                    } else if (so_dot_moi === oldRecord.so_dot && ghi_chu_moi.trim() !== "") {
+                        let targetIdx = oldRecord.lich_su_dot.findIndex(item => item.dot === so_dot_moi);
+                        if(targetIdx !== -1) {
+                            oldRecord.lich_su_dot[targetIdx].ghi_chu = ghi_chu_moi;
+                        } else {
+                            oldRecord.lich_su_dot.push({ dot: so_dot_moi, ghi_chu: ghi_chu_moi });
+                        }
+                    }
+
+                    patientsData[index] = {
+                        id: parseInt(id),
+                        ho_ten: ho_ten,
+                        nam_sinh: nam_sinh,
+                        gioi_tinh: document.getElementById('p-gioitinh').value,
+                        bhyt: document.getElementById('p-bhyt').value,
+                        so_dot: so_dot_moi,
+                        ngay_nhap_ttam: document.getElementById('p-nhapam').value || "—",
+                        ngay_nhap_ttram: document.getElementById('p-nhapram').value || "—",
+                        ngay_ve_khu: document.getElementById('p-vekhu').value || "—",
+                        chan_doan: document.getElementById('p-chandoan').value || "—",
+                        trang_thai: document.getElementById('p-trangthai').value,
+                        lich_su_dot: oldRecord.lich_su_dot
+                    };
+                }
+                alert("Cập nhật thông tin hồ sơ bệnh nhân thành công!");
             } else {
-                // Thêm bản ghi mới
-                patientsData.push(patientData);
+                let newLichSu = [];
+                if(ghi_chu_moi.trim() !== "") {
+                    newLichSu.push({ dot: 1, ghi_chu: ghi_chu_moi });
+                }
+
+                const newPatient = {
+                    id: Date.now(),
+                    ho_ten: ho_ten,
+                    nam_sinh: nam_sinh,
+                    gioi_tinh: document.getElementById('p-gioitinh').value,
+                    bhyt: document.getElementById('p-bhyt').value,
+                    so_dot: so_dot_moi,
+                    ngay_nhap_ttam: document.getElementById('p-nhapam').value || "—",
+                    ngay_nhap_ttram: document.getElementById('p-nhapram').value || "—",
+                    ngay_ve_khu: document.getElementById('p-vekhu').value || "—",
+                    chan_doan: document.getElementById('p-chandoan').value || "—",
+                    trang_thai: document.getElementById('p-trangthai').value,
+                    lich_su_dot: newLichSu
+                };
+                patientsData.push(newPatient);
                 alert("Thêm mới bệnh nhân thành công!");
             }
 
@@ -442,13 +519,13 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
-        // --- XUẤT FILE DANH SÁCH ĐANG ĐIỀU TRỊ ---
         function exportDangDieuTri() {
             alert("Đã kết xuất tệp Excel danh sách các bệnh nhân đang điều trị nội bộ thành công!");
         }
 
-        // Khởi chạy hệ thống
-        window.onload = renderDashboard;
+        window.onload = function() {
+            setFilter('all');
+        };
     </script>
 </body>
 </html>
