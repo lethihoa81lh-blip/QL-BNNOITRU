@@ -565,12 +565,10 @@
 
                 // Tránh ghi đè hoặc phát sinh chuỗi rác
                 database.ref('patients/' + newId).set(newPatient);
-                patientsData.push(newPatient);
                 alert("Thêm mới bệnh nhân thành công!");
             }
 
             closeModal('formModal');
-            renderDashboard();
         }
 
         function deletePatient(id) {
