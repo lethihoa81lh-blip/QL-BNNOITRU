@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Bệnh nhân Nội trú - Nội bộ Trung tâm</title>
+    <title>Quản lý Bệnh nhân Nội trú - Đồng bộ Thời gian thực</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         body { padding: 20px; background-color: #f4f7f6; }
@@ -88,7 +92,7 @@
 </head>
 <body>
 
-    <h2>HỆ THỐNG QUẢN LÝ BỆNH NHÂN NỘI TRÚ (NỘI BỘ TRUNG TÂM)</h2>
+    <h2>HỆ THỐNG QUẢN LÝ BỆNH NÂN NỘI TRÚ (ĐỒNG BỘ REAL-TIME)</h2>
 
     <div class="top-bar">
         <div>Quyền truy cập: <strong id="login-status" style="color: #0081a7;">Người xem (Khách)</strong></div>
@@ -130,7 +134,7 @@
 
     <div class="age-gender-stats">
         <div><strong>Tổng số người ≥ 60 tuổi:</strong> <span class="age-badge" id="detail-age-total">0</span></div>
-        <div>👥 Phân tách: &nbsp;&nbsp;&nbsp; 👨 **Nam:** <span id="detail-age-nam">0</span> &nbsp;&nbsp;|&nbsp;&nbsp; 👩 **Nữ:** <span id="detail-age-nu">0</span></div>
+        <div>👥 Phân tách: &nbsp;&nbsp;&nbsp; 👨 <strong>Nam:</strong> <span id="detail-age-nam">0</span> &nbsp;&nbsp;|&nbsp;&nbsp; 👩 <strong>Nữ:</strong> <span id="detail-age-nu">0</span></div>
     </div>
 
     <div class="clear-float">
@@ -235,40 +239,43 @@
     </div>
 
     <script>
+        // --------- CẤU HÌNH FIREBASE ---------
+        const firebaseConfig = {
+            apiKey: "AIzaSyAIMaHA9RntQ3pxXjOD001Ldh1c1qpseGU",
+            authDomain: "ql-bnnoitru.firebaseapp.com",
+            databaseURL: "https://ql-bnnoitru-default-rtdb.firebaseio.com",
+            projectId: "ql-bnnoitru",
+            storageBucket: "ql-bnnoitru.firebasestorage.app",
+            messagingSenderId: "817969756029",
+            appId: "1:817969756029:web:70230eb5fa26cd4504fe14",
+            measurementId: "G-M8LP1TBEJ8"
+        };
+
+        // Khởi tạo Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        } else {
+            firebase.app();
+        }
+        
+        const database = firebase.database();
         const ADMIN_PASSWORD = "admin";
 
-        let patientsData = [
-            {
-                id: 1, ho_ten: "Huỳnh Thị Yếm", nam_sinh: 1954, gioi_tinh: "Nữ",
-                so_dot: 1, bhyt: "BT2797933840851", trang_thai: "Đã về",
-                lich_su_dot: [
-                    { 
-                        dot: 1, chan_doan: "Chấn thương cổ tay / lão suy", 
-                        ngay_nhap_ttam: "19/06/2026", ngay_nhap_ttram: "18/06/2026", ngay_ve_khu: "25/06/2026", 
-                        ghi_chu: "Bệnh nhân ổn định, tiếp tục theo dõi ngoại trú tại khu." 
-                    }
-                ]
-            },
-            {
-                id: 2, ho_ten: "Nguyễn Thành Được", nam_sinh: 1989, gioi_tinh: "Nam",
-                so_dot: 2, bhyt: "BT2797933840852", trang_thai: "Nằm viện",
-                lich_su_dot: [
-                    { 
-                        dot: 1, chan_doan: "Lao phổi ban đầu", 
-                        ngay_nhap_ttam: "21/06/2025", ngay_nhap_ttram: "20/06/2025", ngay_ve_khu: "30/06/2025", 
-                        ghi_chu: "Nhập viện đợt 1, thể trạng yếu." 
-                    },
-                    { 
-                        dot: 2, chan_doan: "Lao phổi tái phát / Theo dõi HIV", 
-                        ngay_nhap_ttam: "21/06/2026", ngay_nhap_ttram: "20/06/2026", ngay_ve_khu: "—", 
-                        ghi_chu: "Đang điều trị phác đồ chống lao kết hợp ARV." 
-                    }
-                ]
-            }
-        ];
-
+        let patientsData = [];
         let isUserAdmin = false;
         let currentFilter = "all";
+
+        // Lắng nghe dữ liệu realtime từ Firebase (Đồng bộ mọi thiết bị tự động)
+        firebase.database().ref('patients').on('value', (snapshot) => {
+            patientsData = [];
+            const data = snapshot.val();
+            if (data) {
+                Object.keys(data).forEach(key => {
+                    patientsData.push(data[key]);
+                });
+            }
+            renderDashboard();
+        });
 
         function loginAdmin() {
             const enteredPass = document.getElementById('admin-pass').value;
@@ -313,7 +320,7 @@
             const tbody = document.getElementById('patient-list');
             tbody.innerHTML = '';
 
-            // 1. Đếm khối Thống kê trạng thái tổng quan
+            // 1. Đếm thẻ tổng quan
             let total = patientsData.length;
             let treating = patientsData.filter(p => p.trang_thai === "Nằm viện").length;
             let discharged = patientsData.filter(p => p.trang_thai === "Đã về").length;
@@ -338,7 +345,6 @@
             let age60NamFiltered = dataToRender.filter(p => (2026 - p.nam_sinh) >= 60 && p.gioi_tinh === "Nam").length;
             let age60NuFiltered = dataToRender.filter(p => (2026 - p.nam_sinh) >= 60 && p.gioi_tinh === "Nữ").length;
 
-            // Gán kết quả vào khối thẻ mở rộng
             document.getElementById('stat-nam').innerText = namFiltered;
             document.getElementById('stat-nu').innerText = nuFiltered;
             document.getElementById('stat-60').innerText = tuoi60Filtered;
@@ -501,6 +507,7 @@
             }
 
             if(id) {
+                // Trường hợp sửa bệnh nhân cũ
                 let index = patientsData.findIndex(item => item.id === parseInt(id));
                 if(index !== -1) {
                     let oldRecord = patientsData[index];
@@ -524,7 +531,7 @@
                         newLichSu.push(dotObj);
                     }
 
-                    patientsData[index] = {
+                    let updatedPatient = {
                         id: parseInt(id),
                         ho_ten: ho_ten,
                         nam_sinh: nam_sinh,
@@ -534,9 +541,13 @@
                         trang_thai: document.getElementById('p-trangthai').value,
                         lich_su_dot: newLichSu
                     };
+
+                    database.ref('patients/' + id).set(updatedPatient);
                 }
                 alert("Cập nhật thông tin hồ sơ bệnh nhân thành công!");
             } else {
+                // Trường hợp thêm bệnh nhân mới
+                const newId = Date.now();
                 const newLichSu = [{
                     dot: 1,
                     chan_doan: chan_doan,
@@ -547,7 +558,7 @@
                 }];
 
                 const newPatient = {
-                    id: Date.now(),
+                    id: newId,
                     ho_ten: ho_ten,
                     nam_sinh: nam_sinh,
                     gioi_tinh: document.getElementById('p-gioitinh').value,
@@ -556,7 +567,8 @@
                     trang_thai: document.getElementById('p-trangthai').value,
                     lich_su_dot: newLichSu
                 };
-                patientsData.push(newPatient);
+
+                database.ref('patients/' + newId).set(newPatient);
                 alert("Thêm mới bệnh nhân thành công!");
             }
 
@@ -566,8 +578,7 @@
 
         function deletePatient(id) {
             if(confirm("Bạn có chắc chắn muốn xóa hồ sơ bệnh nhân này không? Thao tác này không thể hoàn tác!")) {
-                patientsData = patientsData.filter(item => item.id !== id);
-                renderDashboard();
+                database.ref('patients/' + id).remove();
             }
         }
 
