@@ -92,7 +92,7 @@
 </head>
 <body>
 
-    <h2>HỆ THỐNG QUẢN LÝ BỆNH NÂN NỘI TRÚ (ĐỒNG BỘ REAL-TIME)</h2>
+    <h2>HỆ THỐNG QUẢN LÝ BỆNH NHÂN NỘI TRÚ (ĐỒNG BỘ REAL-TIME)</h2>
 
     <div class="top-bar">
         <div>Quyền truy cập: <strong id="login-status" style="color: #0081a7;">Người xem (Khách)</strong></div>
@@ -239,7 +239,7 @@
     </div>
 
     <script>
-        // --------- CẤU HÌNH FIREBASE ---------
+        // --------- CẤU HÌNH DỰ ÁN CỦA BẠN TỪ FIREBASE ---------
         const firebaseConfig = {
             apiKey: "AIzaSyAIMaHA9RntQ3pxXjOD001Ldh1c1qpseGU",
             authDomain: "ql-bnnoitru.firebaseapp.com",
@@ -266,7 +266,7 @@
         let currentFilter = "all";
 
         // Lắng nghe dữ liệu realtime từ Firebase (Đồng bộ mọi thiết bị tự động)
-        firebase.database().ref('patients').on('value', (snapshot) => {
+        database.ref('patients').on('value', (snapshot) => {
             patientsData = [];
             const data = snapshot.val();
             if (data) {
@@ -320,7 +320,7 @@
             const tbody = document.getElementById('patient-list');
             tbody.innerHTML = '';
 
-            // 1. Đếm thẻ tổng quan
+            // 1. Đếm thẻ trạng thái tổng quan
             let total = patientsData.length;
             let treating = patientsData.filter(p => p.trang_thai === "Nằm viện").length;
             let discharged = patientsData.filter(p => p.trang_thai === "Đã về").length;
@@ -507,7 +507,6 @@
             }
 
             if(id) {
-                // Trường hợp sửa bệnh nhân cũ
                 let index = patientsData.findIndex(item => item.id === parseInt(id));
                 if(index !== -1) {
                     let oldRecord = patientsData[index];
@@ -543,10 +542,10 @@
                     };
 
                     database.ref('patients/' + id).set(updatedPatient);
+                    patientsData[index] = updatedPatient;
                 }
                 alert("Cập nhật thông tin hồ sơ bệnh nhân thành công!");
             } else {
-                // Trường hợp thêm bệnh nhân mới
                 const newId = Date.now();
                 const newLichSu = [{
                     dot: 1,
@@ -569,16 +568,19 @@
                 };
 
                 database.ref('patients/' + newId).set(newPatient);
+                patientsData.push(newPatient);
                 alert("Thêm mới bệnh nhân thành công!");
             }
 
             closeModal('formModal');
-            renderDashboard();
+            renderDashboard(); // Vẽ lại bảng ngay lập tức tránh độ trễ đồng bộ mạng
         }
 
         function deletePatient(id) {
             if(confirm("Bạn có chắc chắn muốn xóa hồ sơ bệnh nhân này không? Thao tác này không thể hoàn tác!")) {
                 database.ref('patients/' + id).remove();
+                patientsData = patientsData.filter(item => item.id !== id);
+                renderDashboard();
             }
         }
 
