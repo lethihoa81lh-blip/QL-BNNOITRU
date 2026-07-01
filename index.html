@@ -28,7 +28,17 @@
         .stat-box h4 { font-size: 11px; color: #6c757d; text-transform: uppercase; margin-bottom: 2px; }
         .stat-box p { font-size: 16px; font-weight: bold; color: #333; }
 
-        .summary-bar { background: #eef1f6; border: 1px solid #b0c4de; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .summary-bar { 
+    background: #eef1f6;
+    border: 1px solid #b0c4de;
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+}
         .summary-bar strong { color: #2c3e50; }
         .age-badge { background-color: #3f577a; color: white; padding: 2px 8px; border-radius: 10px; font-weight: bold; }
 
@@ -42,6 +52,18 @@
         td:first-child, td:nth-child(3), td:nth-child(4), td:nth-child(5), td:nth-child(6), td:nth-child(7), td:nth-child(9) {
             text-align: center;
         }
+        /* Thu gọn các cột ngày tháng */
+th:nth-child(5),
+td:nth-child(5),
+th:nth-child(6),
+td:nth-child(6),
+th:nth-child(7),
+td:nth-child(7) {
+    width: 90px;
+    max-width: 90px;
+    white-space: nowrap;
+    text-align: center;
+}
         tr:nth-child(even) { background-color: #f8f9fa; }
         tr:hover { background-color: #f1f3f5; }
 
@@ -124,11 +146,23 @@
     </div>
 
     <div class="summary-bar">
-        <span><strong style="color: #4a6fa5;">Nam:</strong> <span id="stat-nam">0</span></span>
-        <span><strong style="color: #d17a3f;">Nữ:</strong> <span id="stat-nu">0</span></span>
-        <span><strong style="color: #0081a7;">Bệnh nhân ≥ 60 tuổi:</strong> <span id="stat-60">0</span></span>
-        <span>👥 Phân tách (≥ 60 tuổi): &nbsp; 👨 <strong>Nam:</strong> <span id="detail-age-nam">0</span> &nbsp;|&nbsp; 👩 <strong>Nữ:</strong> <span id="detail-age-nu">0</span></span>
-    </div>
+    <span>
+        <strong style="color:#4a6fa5;">Nam:</strong> 
+        <span id="stat-nam">0</span>
+    </span>
+
+    <span>
+        <strong style="color:#d17a3f;">Nữ:</strong> 
+        <span id="stat-nu">0</span>
+    </span>
+
+    <span>
+        <strong style="color:#0081a7;">≥60 tuổi:</strong> 
+        <span id="stat-60">0</span>
+        (<span id="detail-age-nam">0</span>♂ 
+        <span id="detail-age-nu">0</span>♀)
+    </span>
+</div>
 
     <div class="clear-float">
         <button class="btn btn-add admin-only" onclick="openAddModal()">+ Thêm Bệnh Nhân</button>
