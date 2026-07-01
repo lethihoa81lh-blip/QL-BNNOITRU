@@ -21,7 +21,12 @@
         .btn-logout { background-color: #6c757d; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; }
 
         /* Khu vực Thống kê Tối ưu Gọn nhẹ */
-        .stats-wrapper { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+        .stats-wrapper { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr; 
+    gap: 10px; 
+    margin-bottom: 12px; 
+}
         .stat-box { background: white; padding: 10px; border-radius: 6px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #4a6fa5; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
         .stat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         .stat-box.active { border-width: 5px; background-color: #fafbfc; }
@@ -139,10 +144,7 @@ td:nth-child(7) {
             <h4>ĐÃ XUẤT VIỆN</h4>
             <p id="discharged-patients">0</p>
         </div>
-        <div class="stat-box" style="border-left-color: #6c757d;">
-            <h4>TỬ VONG / KHÁC</h4>
-            <p id="dead-patients">0</p>
-        </div>
+        
     </div>
 
     <div class="summary-bar">
