@@ -389,7 +389,11 @@ td:nth-child(10) {
 
             renderDashboard();
         }
-
+function formatStatus(status) {
+    if (status === "Nằm viện") return "Đang ĐT";
+    if (status === "Đã về") return "Đã về";
+    return status;
+}
         function renderDashboard() {
             const tbody = document.getElementById('patient-list');
             tbody.innerHTML = '';
@@ -455,7 +459,7 @@ td:nth-child(10) {
                     <td>${ngayNhapR}</td>
                     <td>${ngayVeK}</td>
                     <td>${currentChandoan}</td>
-                    <td><span class="status-badge ${badgeClass}">${p.trang_thai}</span></td>
+                    <td><span class="status-badge ${badgeClass}">${formatStatus(p.trang_thai)}</span></td>
                     <td style="white-space: nowrap; text-align: center;">
                         <button class="btn btn-view" onclick="viewDetail(${p.id})">Xem</button>
                         ${adminActionButtons}
