@@ -469,9 +469,9 @@ if (searchText !== "") {
                 let ngayNhapA = "", ngayNhapR = "", ngayVeK = "";
                 if(p.lich_su_dot && p.lich_su_dot.length > 0) {
                     let lastDot = p.lich_su_dot[p.lich_su_dot.length - 1];
-                    ngayNhapA = lastDot.ngay_nhap_ttam || "";
-ngayNhapR = lastDot.ngay_nhap_ttram || "";
-ngayVeK = lastDot.ngay_ve_khu || "";
+                    ngayNhapA = (lastDot.ngay_nhap_ttam === "—") ? "" : (lastDot.ngay_nhap_ttam || "");
+ngayNhapR = (lastDot.ngay_nhap_ttram === "—") ? "" : (lastDot.ngay_nhap_ttram || "");
+ngayVeK = (lastDot.ngay_ve_khu === "—") ? "" : (lastDot.ngay_ve_khu || "");
                 }
                 
                 let row = `<tr>
@@ -594,10 +594,9 @@ ngayVeK = lastDot.ngay_ve_khu || "";
             const nam_sinh = parseInt(document.getElementById('p-namsinh').value);
             const so_dot_nhap = parseInt(document.getElementById('p-sodot').value) || 1;
             
-            const nhap_am = document.getElementById('p-nhapam').value || "—";
-            const nhap_ram = document.getElementById('p-nhapram').value || "—";
-            const ve_khu = document.getElementById('p-vekhu').value || "—";
-            const chan_doan = document.getElementById('p-chandoan').value || "—";
+            const nhap_am = document.getElementById('p-nhapam').value || "";
+const nhap_ram = document.getElementById('p-nhapram').value || "";
+const ve_khu = document.getElementById('p-vekhu').value || "";
             const ghi_chu = document.getElementById('p-ghichu').value || "";
 
             if(!ho_ten || isNaN(nam_sinh)) {
