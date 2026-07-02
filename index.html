@@ -220,7 +220,15 @@ td:nth-child(10) {
         <button class="btn btn-add admin-only" onclick="openAddModal()">+ Thêm Bệnh Nhân</button>
         <button class="btn btn-export" onclick="exportDangDieuTri()">Xuất Excel (Đang điều trị)</button>
     </div>
-
+<div style="margin:10px 0;">
+    <input 
+        type="text" 
+        id="search-name" 
+        placeholder="🔍 Tìm theo họ tên..."
+        onkeyup="searchPatient()"
+        style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;"
+    >
+</div>
     <div class="table-container">
         <table>
             <thead>
@@ -343,6 +351,7 @@ td:nth-child(10) {
         let patientsData = [];
         let isUserAdmin = false;
         let currentFilter = "all";
+let searchText = "";
 
         // Lắng nghe dữ liệu Realtime Database
         database.ref('patients').on('value', (snapshot) => {
@@ -417,10 +426,17 @@ function formatStatus(status) {
             document.getElementById('discharged-patients').innerText = discharged;
 
             // 2. Lọc danh sách theo trạng thái bấm chọn
-            let dataToRender = patientsData;
-            if (currentFilter !== "all") {
-                dataToRender = patientsData.filter(p => p.trang_thai === currentFilter);
-            }
+           let dataToRender = patientsData;
+
+if (currentFilter !== "all") {
+    dataToRender = dataToRender.filter(p => p.trang_thai === currentFilter);
+}
+
+if (searchText !== "") {
+    dataToRender = dataToRender.filter(p =>
+        p.ho_ten.toLowerCase().includes(searchText)
+    );
+}
 
             // 3. Cập nhật thống kê mở rộng (Theo danh sách lọc)
             let namFiltered = dataToRender.filter(p => p.gioi_tinh === "Nam").length;
@@ -450,12 +466,12 @@ function formatStatus(status) {
                     currentChandoan = lastDot.chan_doan || "—";
                 }
                 
-                let ngayNhapA = "—", ngayNhapR = "—", ngayVeK = "—";
+                let ngayNhapA = "", ngayNhapR = "", ngayVeK = "";
                 if(p.lich_su_dot && p.lich_su_dot.length > 0) {
                     let lastDot = p.lich_su_dot[p.lich_su_dot.length - 1];
-                    ngayNhapA = lastDot.ngay_nhap_ttam || "—";
-                    ngayNhapR = lastDot.ngay_nhap_ttram || "—";
-                    ngayVeK = lastDot.ngay_ve_khu || "—";
+                    ngayNhapA = lastDot.ngay_nhap_ttam || "";
+ngayNhapR = lastDot.ngay_nhap_ttram || "";
+ngayVeK = lastDot.ngay_ve_khu || "";
                 }
                 
                 let row = `<tr>
@@ -676,7 +692,13 @@ function formatStatus(status) {
         function exportDangDieuTri() {
             alert("Đã kết xuất tệp Excel danh sách các bệnh nhân đang điều trị nội bộ thành công!");
         }
+function searchPatient() {
+    searchText = document.getElementById('search-name')
+        .value
+        .toLowerCase();
 
+    renderDashboard();
+}
         window.onload = function() {
             setFilter('all');
         };
