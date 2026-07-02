@@ -7,7 +7,7 @@
     
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
         body { padding: 15px; background-color: #f4f7f6; max-width: 1200px; margin: 0 auto; }
@@ -689,8 +689,42 @@ const ve_khu = document.getElementById('p-vekhu').value || "";
         }
 
         function exportDangDieuTri() {
-            alert("Đã kết xuất tệp Excel danh sách các bệnh nhân đang điều trị nội bộ thành công!");
-        }
+
+    const data = patientsData.filter(p => p.trang_thai === "Nằm viện");
+
+    if (data.length === 0) {
+        alert("Không có bệnh nhân đang điều trị.");
+        return;
+    }
+
+    const excelData = data.map((p, index) => {
+
+        let dot = p.lich_su_dot && p.lich_su_dot.length
+            ? p.lich_su_dot[p.lich_su_dot.length - 1]
+            : {};
+
+        return {
+            "STT": index + 1,
+            "Họ và tên": p.ho_ten,
+            "Năm sinh": p.nam_sinh,
+            "Giới tính": p.gioi_tinh,
+            "Nhập TT": dot.ngay_nhap_ttam || "",
+            "Nhập TX": dot.ngay_nhap_ttram || "",
+            "Ngày về khu": dot.ngay_ve_khu || "",
+            "Chẩn đoán": dot.chan_doan || "",
+            "Trạng thái": p.trang_thai
+        };
+
+    });
+
+    const ws = XLSX.utils.json_to_sheet(excelData);
+
+    const wb = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(wb, ws, "Dang dieu tri");
+
+    XLSX.writeFile(wb, "Danh_sach_dang_dieu_tri.xlsx");
+}
 function searchPatient() {
     searchText = document.getElementById('search-name')
         .value
