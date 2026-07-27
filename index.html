@@ -596,8 +596,11 @@ ngayVeK = (lastDot.ngay_ve_khu === "—") ? "" : (lastDot.ngay_ve_khu || "");
             
             const nhap_am = document.getElementById('p-nhapam').value || "";
 const nhap_ram = document.getElementById('p-nhapram').value || "";
-const ve_khu = document.getElementById('p-vekhu').value || "";
-            const chan_doan = document.getElementById('p-chandoan').value || "";
+const ve_khu = document.getElementById('p-vekhu').value.trim() || "";
+const chan_doan = document.getElementById('p-chandoan').value || "";
+
+// Tự động xác định trạng thái dựa vào Ngày về khu
+const trang_thai_tu_dong = ve_khu !== "" ? "Đã về" : "Nằm viện";
             const ghi_chu = document.getElementById('p-ghichu').value || "";
 
             if(!ho_ten || isNaN(nam_sinh)) {
@@ -636,7 +639,7 @@ const ve_khu = document.getElementById('p-vekhu').value || "";
                         gioi_tinh: document.getElementById('p-gioitinh').value,
                         bhyt: document.getElementById('p-bhyt').value,
                         so_dot: newLichSu.length,
-                        trang_thai: document.getElementById('p-trangthai').value,
+                        trang_thai: trang_thai_tu_dong,
                         lich_su_dot: newLichSu
                     };
 
@@ -664,7 +667,7 @@ const ve_khu = document.getElementById('p-vekhu').value || "";
                     gioi_tinh: document.getElementById('p-gioitinh').value,
                     bhyt: document.getElementById('p-bhyt').value,
                     so_dot: 1,
-                    trang_thai: document.getElementById('p-trangthai').value,
+                    trang_thai: trang_thai_tu_dong,
                     lich_su_dot: newLichSu
                 };
 
