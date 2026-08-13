@@ -23,9 +23,12 @@
         /* Khu vực Thống kê Tối ưu Gọn nhẹ */
         .stats-wrapper { 
     display: grid; 
-    grid-template-columns: 1fr 1fr 1fr; 
+    grid-template-columns: repeat(4, 1fr); 
     gap: 10px; 
     margin-bottom: 12px; 
+}
+@media (max-width: 480px) {
+    .stats-wrapper { grid-template-columns: 1fr 1fr; }
 }
         .stat-box { background: white; padding: 10px; border-radius: 6px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 4px solid #4a6fa5; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
         .stat-box:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
@@ -126,6 +129,7 @@ td:nth-child(10) {
         .status-badge { display: inline-block; padding: 3px 4px; border-radius: 10px; font-size: 9px; font-weight: 600; text-align: center; }
         .status-on { background-color: #ffe8d6; color: #d17a3f; }
         .status-off { background-color: #e8f5e9; color: #2e7d32; }
+        .status-transfer { background-color: #e3e0f7; color: #5b4bcf; }
 
         /* Nút thao tác */
         .btn { padding: 2px 4px; border: none; border-radius: 4px; cursor: pointer; font-size: 7px; font-weight: 600; text-decoration: none; display: inline-block; }
@@ -194,7 +198,10 @@ td:nth-child(10) {
             <h4>ĐÃ XUẤT VIỆN</h4>
             <p id="discharged-patients">0</p>
         </div>
-        
+        <div class="stat-box" id="filter-transfer" onclick="setFilter('Chuyển viện')" style="border-left-color: #5b4bcf;">
+            <h4>CHUYỂN VIỆN</h4>
+            <p id="transfer-patients">0</p>
+        </div>
     </div>
 
     <div class="summary-bar">
@@ -318,7 +325,9 @@ Nữ: <span id="detail-age-nu">0</span>)
                 <select id="p-trangthai">
                     <option value="Nằm viện">Nằm viện</option>
                     <option value="Đã về">Đã về</option>
+                    <option value="Chuyển viện">Chuyển viện</option>
                 </select>
+                <div style="font-size:10px; color:#888; margin-top:2px;">Lưu ý: nếu để "Nằm viện"/"Đã về", hệ thống sẽ tự động xác định lại theo "Ngày về khu". Chỉ chọn "Chuyển viện" mới giữ nguyên trạng thái này khi lưu.</div>
             </div>
             
             <button class="btn" style="background-color: #28a745; color: white; width: 100%; padding: 8px; font-size: 13px; border-radius: 6px;" onclick="savePatient()">Lưu thông tin</button>
@@ -403,12 +412,14 @@ let searchText = "";
             if(status === 'all') document.getElementById('filter-all').classList.add('active');
             else if(status === 'Nằm viện') document.getElementById('filter-treating').classList.add('active');
             else if(status === 'Đã về') document.getElementById('filter-discharged').classList.add('active');
+            else if(status === 'Chuyển viện') document.getElementById('filter-transfer').classList.add('active');
 
             renderDashboard();
         }
 function formatStatus(status) {
     if (status === "Nằm viện") return "Đang ĐT";
     if (status === "Đã về") return "Đã về";
+    if (status === "Chuyển viện") return "Chuyển viện";
     return status;
 }
         function renderDashboard() {
@@ -419,11 +430,12 @@ function formatStatus(status) {
             let total = patientsData.length;
             let treating = patientsData.filter(p => p.trang_thai === "Nằm viện").length;
             let discharged = patientsData.filter(p => p.trang_thai === "Đã về").length;
-            let dead = patientsData.filter(p => p.trang_thai === "Tử vong").length;
+            let transferred = patientsData.filter(p => p.trang_thai === "Chuyển viện").length;
 
             document.getElementById('total-patients').innerText = total;
             document.getElementById('treating-patients').innerText = treating;
             document.getElementById('discharged-patients').innerText = discharged;
+            document.getElementById('transfer-patients').innerText = transferred;
 
             // 2. Lọc danh sách theo trạng thái bấm chọn
            let dataToRender = patientsData;
@@ -454,7 +466,9 @@ if (searchText !== "") {
 
             // 4. Vẽ bảng danh sách
             dataToRender.forEach((p, index) => {
-                let badgeClass = (p.trang_thai === "Nằm viện") ? "status-on" : "status-off";
+                let badgeClass = "status-off";
+                if (p.trang_thai === "Nằm viện") badgeClass = "status-on";
+                else if (p.trang_thai === "Chuyển viện") badgeClass = "status-transfer";
                 let adminActionButtons = isUserAdmin ? `
                     <button class="btn btn-edit" onclick="openEditModal(${p.id})">Sửa</button>
                     <button class="btn btn-delete" onclick="deletePatient(${p.id})">Xóa</button>
@@ -599,8 +613,12 @@ const nhap_ram = document.getElementById('p-nhapram').value || "";
 const ve_khu = document.getElementById('p-vekhu').value.trim() || "";
 const chan_doan = document.getElementById('p-chandoan').value || "";
 
-// Tự động xác định trạng thái dựa vào Ngày về khu
-const trang_thai_tu_dong = ve_khu !== "" ? "Đã về" : "Nằm viện";
+// Trạng thái: nếu admin chọn thủ công "Chuyển viện" thì giữ nguyên,
+// ngược lại tự động xác định như cũ dựa vào Ngày về khu
+const trang_thai_chon = document.getElementById('p-trangthai').value;
+const trang_thai_tu_dong = (trang_thai_chon === "Chuyển viện")
+    ? "Chuyển viện"
+    : (ve_khu !== "" ? "Đã về" : "Nằm viện");
             const ghi_chu = document.getElementById('p-ghichu').value || "";
 
             if(!ho_ten || isNaN(nam_sinh)) {
