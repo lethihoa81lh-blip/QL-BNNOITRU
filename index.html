@@ -166,6 +166,30 @@ td:nth-child(10) {
         .modal-info span { font-weight: bold; color: #333; }
         .history-item { margin-bottom: 8px; padding: 6px; background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; font-size: 12px; }
         .history-item p { margin-bottom: 1px; }
+        /* ===== Ghi chú công việc điều dưỡng ===== */
+.nl-wrap{margin:12px 0}
+.nl-toggle{width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 15px;background:#eef1f6;border:1px solid #b0c4de;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#2c3e50}
+.nl-panel{display:none;background:#fff;padding:12px;border:1px solid #e9ecef;border-radius:0 0 8px 8px;box-shadow:0 2px 4px rgba(0,0,0,.05)}
+.nl-panel.open{display:block}
+.nl-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:10px}
+.nl-stat{background:#f8f9fa;border-left:3px solid #4a6fa5;border-radius:4px;padding:4px 2px;text-align:center;min-width:0}
+.nl-stat h5{font-size:9px;color:#6c757d;font-weight:600;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nl-stat p{font-size:14px;font-weight:700;color:#333}
+.nl-stat.total{border-left-color:#28a745}
+.nl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;margin-bottom:8px}
+.nl-grid label{display:block;font-size:11px;font-weight:600;color:#495057;margin-bottom:2px}
+.nl-grid input,.nl-grid select{width:100%;padding:6px 8px;border:1px solid #ced4da;border-radius:4px;font-size:12px}
+.nl-btn{padding:7px 12px;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;color:#fff}
+.nl-btn.add{background:#007bff}
+.nl-btn.exp{background:#28a745}
+.nl-btn.del{background:#dc3545;padding:2px 6px;font-size:10px}
+.nl-sub{font-size:12px;font-weight:700;color:#2c3e50;margin:10px 0 4px}
+.nl-tbl-wrap{overflow-x:auto;max-height:260px;overflow-y:auto;border:1px solid #ced4da;border-radius:6px}
+.nl-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.nl-tbl th,.nl-tbl td{padding:5px 8px;border:1px solid #ced4da;text-align:center}
+.nl-tbl th{background:#e9ecef;position:sticky;top:0}
+.nl-tbl td.left{text-align:left}
+@media (max-width:480px){.nl-stat h5{font-size:8px}.nl-stat p{font-size:13px}}
     </style>
 </head>
 <body>
@@ -256,7 +280,45 @@ Nữ: <span id="detail-age-nu">0</span>)
                 </tbody>
         </table>
     </div>
+<div class="nl-wrap">
+    <button class="nl-toggle" type="button" onclick="nlToggle()">
+        <span>📋 Ghi chú công việc điều dưỡng</span><span id="nl-arrow">▼</span>
+    </button>
+    <div class="nl-panel" id="nl-panel">
 
+        <div class="nl-stats" id="nl-stats"></div>
+
+        <div class="nl-grid">
+            <div><label>Từ ngày</label><input type="date" id="nl-from" onchange="nlRender()"></div>
+            <div><label>Đến ngày</label><input type="date" id="nl-to" onchange="nlRender()"></div>
+            <div><label>Lọc theo điều dưỡng</label><select id="nl-fnurse" onchange="nlRender()"><option value="">Tất cả</option></select></div>
+        </div>
+
+        <div class="nl-sub">+ Ghi nhận công việc</div>
+        <div class="nl-grid">
+            <div><label>Ngày</label><input type="date" id="nl-date"></div>
+            <div><label>Tên điều dưỡng</label><input type="text" id="nl-dd" list="nl-dd-list" placeholder="Họ tên DD"></div>
+            <div><label>Công việc</label><select id="nl-type"></select></div>
+            <div><label>Số lượt</label><input type="number" id="nl-sl" value="1" min="1"></div>
+            <div style="grid-column:1/-1"><label>Ghi chú (bệnh nhân, nội dung...)</label><input type="text" id="nl-note" placeholder="Không bắt buộc"></div>
+        </div>
+        <datalist id="nl-dd-list"></datalist>
+        <button class="nl-btn add" type="button" onclick="nlAdd()">Lưu ghi chú</button>
+        <button class="nl-btn exp" type="button" onclick="nlExport()" style="float:right">Xuất Excel</button>
+        <div style="clear:both"></div>
+
+        <div class="nl-sub">Tổng hợp theo điều dưỡng</div>
+        <div class="nl-tbl-wrap"><table class="nl-tbl"><thead id="nl-sum-head"></thead><tbody id="nl-sum-body"></tbody></table></div>
+
+        <div class="nl-sub">Chi tiết</div>
+        <div class="nl-tbl-wrap">
+            <table class="nl-tbl">
+                <thead><tr><th>Ngày</th><th>Điều dưỡng</th><th>Công việc</th><th>SL</th><th>Ghi chú</th><th></th></tr></thead>
+                <tbody id="nl-detail-body"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('detailModal')">&times;</span>
@@ -758,5 +820,148 @@ function searchPatient() {
             setFilter('all');
         };
     </script>
+    <script>
+(function () {
+    // Nếu vì lý do nào đó chưa có Firebase thì bỏ qua, không ảnh hưởng phần cũ
+    if (typeof database === 'undefined') return;
+
+    const TYPES = [
+        { k: 'sinh_hieu',  l: 'Sinh hiệu',          s: 'Sinh hiệu' },
+        { k: 'phat_thuoc', l: 'Phát thuốc',         s: 'Phát thuốc' },
+        { k: 'rua_vet',    l: 'Rửa vết thương',     s: 'Rửa VT' },
+        { k: 'tiem_truyen',l: 'Tiêm truyền',        s: 'Tiêm truyền' },
+        { k: 'dot_xuat',   l: 'Tiếp nhận đột xuất', s: 'Đột xuất' }
+    ];
+    let logs = [];
+    const $ = id => document.getElementById(id);
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const pad = n => String(n).padStart(2, '0');
+    const today = () => { const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+    const fmt = iso => { const p = (iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : (iso || ''); };
+    const typeLabel = k => { const t = TYPES.find(x => x.k === k); return t ? t.l : k; };
+
+    // Khởi tạo form
+    $('nl-type').innerHTML = TYPES.map(t => `<option value="${t.k}">${t.l}</option>`).join('');
+    $('nl-date').value = today();
+    $('nl-from').value = today();
+    $('nl-to').value = today();
+
+    function filtered() {
+        const f = $('nl-from').value, t = $('nl-to').value, n = $('nl-fnurse').value;
+        return logs
+            .filter(x => (!f || x.ngay >= f) && (!t || x.ngay <= t) && (!n || x.dd === n))
+            .sort((a, b) => (b.ngay || '').localeCompare(a.ngay || '') || (b.id - a.id));
+    }
+
+    function pivot(data) {
+        const map = {};
+        data.forEach(x => {
+            if (!map[x.dd]) { map[x.dd] = { name: x.dd, total: 0 }; TYPES.forEach(t => map[x.dd][t.k] = 0); }
+            const sl = Number(x.sl) || 1;
+            if (map[x.dd][x.loai] === undefined) map[x.dd][x.loai] = 0;
+            map[x.dd][x.loai] += sl;
+            map[x.dd].total += sl;
+        });
+        return Object.values(map).sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    }
+
+    function refreshNurses() {
+        const names = [...new Set(logs.map(x => x.dd).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'vi'));
+        const sel = $('nl-fnurse'), cur = sel.value;
+        sel.innerHTML = '<option value="">Tất cả</option>' + names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+        sel.value = names.includes(cur) ? cur : '';
+        $('nl-dd-list').innerHTML = names.map(n => `<option value="${esc(n)}">`).join('');
+    }
+
+    window.nlRender = function () {
+        const data = filtered();
+
+        // Thanh thống kê 1 hàng
+        const sums = {}; let total = 0;
+        TYPES.forEach(t => sums[t.k] = 0);
+        data.forEach(x => { const sl = Number(x.sl) || 1; sums[x.loai] = (sums[x.loai] || 0) + sl; total += sl; });
+        $('nl-stats').innerHTML =
+            TYPES.map(t => `<div class="nl-stat"><h5>${t.s}</h5><p>${sums[t.k]}</p></div>`).join('') +
+            `<div class="nl-stat total"><h5>Tổng</h5><p>${total}</p></div>`;
+
+        // Bảng tổng hợp theo DD
+        $('nl-sum-head').innerHTML = '<tr><th>Điều dưỡng</th>' + TYPES.map(t => `<th>${t.s}</th>`).join('') + '<th>Tổng</th></tr>';
+        const pv = pivot(data);
+        $('nl-sum-body').innerHTML = pv.length
+            ? pv.map(r => `<tr><td class="left"><b>${esc(r.name)}</b></td>` + TYPES.map(t => `<td>${r[t.k]}</td>`).join('') + `<td><b>${r.total}</b></td></tr>`).join('')
+            : `<tr><td colspan="${TYPES.length + 2}">Chưa có dữ liệu</td></tr>`;
+
+        // Bảng chi tiết
+        const isAdm = (typeof isUserAdmin !== 'undefined') && isUserAdmin;
+        $('nl-detail-body').innerHTML = data.length
+            ? data.map(x => `<tr>
+                <td>${fmt(x.ngay)}</td>
+                <td class="left">${esc(x.dd)}</td>
+                <td class="left">${esc(typeLabel(x.loai))}</td>
+                <td>${Number(x.sl) || 1}</td>
+                <td class="left">${esc(x.ghi_chu)}</td>
+                <td>${isAdm ? `<button class="nl-btn del" onclick="nlDel(${x.id})">Xóa</button>` : ''}</td>
+              </tr>`).join('')
+            : '<tr><td colspan="6">Chưa có dữ liệu</td></tr>';
+    };
+
+    window.nlToggle = function () {
+        const p = $('nl-panel'); const open = p.classList.toggle('open');
+        $('nl-arrow').innerText = open ? '▲' : '▼';
+        if (open) nlRender(); // cập nhật lại nút Xóa theo quyền Admin hiện tại
+    };
+
+    window.nlAdd = function () {
+        const ngay = $('nl-date').value;
+        const dd = $('nl-dd').value.trim();
+        const loai = $('nl-type').value;
+        const sl = parseInt($('nl-sl').value) || 1;
+        const ghi_chu = $('nl-note').value.trim();
+        if (!ngay || !dd) { alert('Vui lòng nhập Ngày và Tên điều dưỡng!'); return; }
+        const id = Date.now();
+        database.ref('nursing_logs/' + id).set({ id, ngay, dd, loai, sl, ghi_chu })
+            .then(() => { $('nl-note').value = ''; $('nl-sl').value = 1; })
+            .catch(e => alert('Không lưu được: ' + e.message));
+    };
+
+    window.nlDel = function (id) {
+        if (!((typeof isUserAdmin !== 'undefined') && isUserAdmin)) return;
+        if (confirm('Xóa dòng ghi chú này?')) database.ref('nursing_logs/' + id).remove();
+    };
+
+    window.nlExport = function () {
+        const data = filtered();
+        if (!data.length) { alert('Không có dữ liệu để xuất.'); return; }
+        const detail = data.map((x, i) => ({
+            'STT': i + 1, 'Ngày': fmt(x.ngay), 'Điều dưỡng': x.dd,
+            'Công việc': typeLabel(x.loai), 'Số lượt': Number(x.sl) || 1, 'Ghi chú': x.ghi_chu || ''
+        }));
+        const summary = pivot(data).map(r => {
+            const o = { 'Điều dưỡng': r.name };
+            TYPES.forEach(t => o[t.l] = r[t.k]);
+            o['Tổng'] = r.total;
+            return o;
+        });
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), 'Tong hop theo DD');
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detail), 'Chi tiet');
+        const f = $('nl-from').value || 'all', t = $('nl-to').value || 'all';
+        XLSX.writeFile(wb, 'Thong_ke_dieu_duong_' + f + '_den_' + t + '.xlsx');
+    };
+
+    // Lắng nghe dữ liệu realtime (nhánh riêng, không đụng 'patients')
+    try {
+        database.ref('nursing_logs').on('value', snap => {
+            logs = [];
+            const d = snap.val();
+            if (d) Object.keys(d).forEach(k => { if (d[k] && d[k].id) logs.push(d[k]); });
+            refreshNurses();
+            nlRender();
+        }, err => console.error('nursing_logs:', err));
+    } catch (e) { console.error(e); }
+
+    nlRender();
+})();
+</script>
 </body>
 </html>
