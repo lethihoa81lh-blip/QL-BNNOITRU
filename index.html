@@ -205,6 +205,15 @@ td:nth-child(10) {
 .nl-tbl th{background:#e9ecef;position:sticky;top:0}
 .nl-tbl td.left{text-align:left}
 .nl-tbl td.act{white-space:nowrap}
+        /* Trả độ rộng cột của 2 bảng ghi chú về tự động */
+table.nl-tbl th, table.nl-tbl td{width:auto;min-width:0;max-width:none;white-space:normal}
+
+/* Cột tên điều dưỡng rộng hơn */
+#nl-sum-body td:nth-child(1){min-width:160px;white-space:nowrap}
+#nl-detail-body td:nth-child(2){min-width:160px;white-space:nowrap}
+
+/* Cột ghi chú rộng vừa phải */
+#nl-detail-body td:nth-child(5){min-width:120px}
 @media (max-width:480px){.nl-stat h5{font-size:8px}.nl-stat p{font-size:13px}}
     </style>
 </head>
