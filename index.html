@@ -166,6 +166,57 @@ td:nth-child(10) {
         .modal-info span { font-weight: bold; color: #333; }
         .history-item { margin-bottom: 8px; padding: 6px; background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; font-size: 12px; }
         .history-item p { margin-bottom: 1px; }
+
+/* ===== Ghi chú công việc điều dưỡng ===== */
+/* 5 ô thống kê trên 1 dòng (kể cả điện thoại) */
+.stats-wrapper{grid-template-columns:repeat(5,minmax(0,1fr))}
+.nl-box{border-left-color:#28a745}
+        #nl-today{display:none}
+.nl-box{display:flex;align-items:center;justify-content:center}
+.nl-box.nl-open{border-left-width:6px;background:#fafbfc}
+@media (max-width:480px){
+    .stats-wrapper{grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+    .stat-box{padding:6px 2px}
+    .stat-box h4{font-size:8px;line-height:1.15}
+    .stat-box p{font-size:14px}
+}
+
+/* Bảng ghi chú */
+.nl-panel{display:none;background:#fff;padding:12px;margin-bottom:12px;border:1px solid #e9ecef;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.05)}
+.nl-panel.open{display:block}
+.nl-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-bottom:10px}
+.nl-stat{background:#f8f9fa;border-left:3px solid #4a6fa5;border-radius:4px;padding:4px 2px;text-align:center;min-width:0}
+.nl-stat h5{font-size:9px;color:#6c757d;font-weight:600;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nl-stat p{font-size:14px;font-weight:700;color:#333}
+.nl-stat.total{border-left-color:#28a745}
+.nl-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;margin-bottom:8px}
+.nl-grid label{display:block;font-size:11px;font-weight:600;color:#495057;margin-bottom:2px}
+.nl-grid input,.nl-grid select{width:100%;padding:6px 8px;border:1px solid #ced4da;border-radius:4px;font-size:12px}
+.nl-form-box{padding:6px;border-radius:6px}
+.nl-form-box.nl-editing{background:#fff8e1;border:1px dashed #d39e00}
+.nl-btn{padding:7px 12px;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;color:#fff}
+.nl-btn.add{background:#007bff}
+.nl-btn.cancel{background:#6c757d;margin-left:4px}
+.nl-btn.exp{background:#28a745}
+.nl-btn.edit{background:#ffc107;color:#212529;padding:2px 6px;font-size:10px}
+.nl-btn.del{background:#dc3545;padding:2px 6px;font-size:10px}
+.nl-sub{font-size:12px;font-weight:700;color:#2c3e50;margin:10px 0 4px}
+.nl-tbl-wrap{overflow-x:auto;max-height:260px;overflow-y:auto;border:1px solid #ced4da;border-radius:6px}
+.nl-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.nl-tbl th,.nl-tbl td{padding:5px 8px;border:1px solid #ced4da;text-align:center}
+.nl-tbl th{background:#e9ecef;position:sticky;top:0}
+.nl-tbl td.left{text-align:left}
+.nl-tbl td.act{white-space:nowrap}
+        /* Trả độ rộng cột của 2 bảng ghi chú về tự động */
+table.nl-tbl th, table.nl-tbl td{width:auto;min-width:0;max-width:none;white-space:normal}
+
+/* Cột tên điều dưỡng rộng hơn */
+#nl-sum-body td:nth-child(1){min-width:160px;white-space:nowrap}
+#nl-detail-body td:nth-child(2){min-width:160px;white-space:nowrap}
+
+/* Cột ghi chú rộng vừa phải */
+#nl-detail-body td:nth-child(5){min-width:120px}
+@media (max-width:480px){.nl-stat h5{font-size:8px}.nl-stat p{font-size:13px}}
     </style>
 </head>
 <body>
@@ -202,7 +253,52 @@ td:nth-child(10) {
             <h4>CHUYỂN VIỆN</h4>
             <p id="transfer-patients">0</p>
         </div>
+
+        <div class="stat-box nl-box" id="nl-box" onclick="nlToggle()">
+            <h4>GHI CHÚ ĐD</h4>
+            <p id="nl-today">0</p>
+        </div>
     </div>
+
+    <div class="nl-panel" id="nl-panel">
+
+        <div class="nl-stats" id="nl-stats"></div>
+
+        <div class="nl-grid">
+            <div><label>Từ ngày</label><input type="date" id="nl-from" onchange="nlRender()"></div>
+            <div><label>Đến ngày</label><input type="date" id="nl-to" onchange="nlRender()"></div>
+            <div><label>Lọc theo điều dưỡng</label><select id="nl-fnurse" onchange="nlRender()"><option value="">Tất cả</option></select></div>
+        </div>
+
+        <div class="nl-form-box" id="nl-form-box">
+            <div class="nl-sub" id="nl-form-title" style="margin-top:0">+ Ghi nhận công việc</div>
+            <input type="hidden" id="nl-id">
+            <div class="nl-grid">
+                <div><label>Ngày</label><input type="date" id="nl-date"></div>
+                <div><label>Tên điều dưỡng</label><input type="text" id="nl-dd" list="nl-dd-list" placeholder="Họ tên DD"></div>
+                <div><label>Công việc</label><select id="nl-type"></select></div>
+                <div><label>Số lượt</label><input type="number" id="nl-sl" value="1" min="1"></div>
+                <div style="grid-column:1/-1"><label>Ghi chú (bệnh nhân, nội dung...)</label><input type="text" id="nl-note" placeholder="Không bắt buộc"></div>
+            </div>
+            <datalist id="nl-dd-list"></datalist>
+            <button class="nl-btn add" id="nl-save-btn" type="button" onclick="nlSave()">Lưu ghi chú</button>
+            <button class="nl-btn cancel" id="nl-cancel-btn" type="button" onclick="nlCancel()" style="display:none">Hủy sửa</button>
+            <button class="nl-btn exp" type="button" onclick="nlExport()" style="float:right">Xuất Excel</button>
+            <div style="clear:both"></div>
+        </div>
+
+        <div class="nl-sub">Tổng hợp theo điều dưỡng</div>
+        <div class="nl-tbl-wrap"><table class="nl-tbl"><thead id="nl-sum-head"></thead><tbody id="nl-sum-body"></tbody></table></div>
+
+        <div class="nl-sub">Chi tiết</div>
+        <div class="nl-tbl-wrap">
+            <table class="nl-tbl">
+                <thead><tr><th>Ngày</th><th>Điều dưỡng</th><th>Công việc</th><th>SL</th><th>Ghi chú</th><th></th></tr></thead>
+                <tbody id="nl-detail-body"></tbody>
+            </table>
+        </div>
+    </div>
+
 
     <div class="summary-bar">
     <span>
@@ -528,9 +624,19 @@ ngayVeK = (lastDot.ngay_ve_khu === "—") ? "" : (lastDot.ngay_ve_khu || "");
             return p.trang_thai !== "Nằm viện" || (last && !isBlankDate(last.ngay_ve_khu));
         }
 
+        // Ngày nhập trung tâm là cố định cho cả hồ sơ: lấy từ đợt đầu tiên có ngày
+        function getCenterDate(p) {
+            const arr = p.lich_su_dot || [];
+            for (const d of arr) {
+                if (!isBlankDate(d.ngay_nhap_ttam)) return d.ngay_nhap_ttam;
+            }
+            return "";
+        }
+
         function fillDotFields(p, dotNum) {
             const d = (p.lich_su_dot || []).find(x => parseInt(x.dot) === dotNum);
-            document.getElementById('p-nhapam').value = d ? (d.ngay_nhap_ttam || "") : "";
+            // Đợt đã có -> hiện đúng dữ liệu đợt đó; đợt mới -> giữ lại ngày nhập trung tâm cũ
+            document.getElementById('p-nhapam').value = d ? (d.ngay_nhap_ttam || "") : getCenterDate(p);
             document.getElementById('p-nhapram').value = d ? (d.ngay_nhap_ttram || "") : "";
             document.getElementById('p-vekhu').value = d ? (d.ngay_ve_khu || "") : "";
             document.getElementById('p-chandoan').value = d ? (d.chan_doan || "") : "";
@@ -638,7 +744,7 @@ ngayVeK = (lastDot.ngay_ve_khu === "—") ? "" : (lastDot.ngay_ve_khu || "");
                 document.getElementById('lbl-dot-num').innerText = nextNum;
                 fillDotFields(p, nextNum);
                 document.getElementById('p-trangthai').value = "Nằm viện";
-                showDotNotice(`🔄 Bệnh nhân đã kết thúc <b>đợt ${lastNum}</b> → tự chuyển sang <b>đợt ${nextNum}</b>, chỉ cần nhập ngày nhập mới. Muốn sửa đợt cũ: đổi số đợt về số tương ứng.`);
+                showDotNotice(`🔄 Bệnh nhân đã kết thúc <b>đợt ${lastNum}</b> → tự chuyển sang <b>đợt ${nextNum}</b>, Ngày nhập trung tâm được giữ nguyên, chỉ cần nhập ngày nhập trạm xá và thông tin đợt mới. Muốn sửa đợt cũ: đổi số đợt về số tương ứng.`);
             } else {
                 // Đang điều trị -> sửa đúng đợt hiện tại
                 document.getElementById('p-sodot').value = lastNum;
@@ -685,7 +791,8 @@ const trang_thai_tu_dong = (trang_thai_chon === "Chuyển viện")
                     const maxDot = getMaxDot(oldRecord);
                     let checkExistIdx = newLichSu.findIndex(item => parseInt(item.dot) === so_dot_nhap);
                     const isNewDot = checkExistIdx === -1;
-                    const dotTrong = isBlankDate(nhap_am) && isBlankDate(nhap_ram) && isBlankDate(ve_khu)
+                    // Không xét ngày nhập trung tâm vì nó được điền sẵn từ đợt trước
+                    const dotTrong = isBlankDate(nhap_ram) && isBlankDate(ve_khu)
                                      && !chan_doan.trim() && !ghi_chu.trim();
 
                     let trangThaiMoi = oldRecord.trang_thai;
@@ -700,15 +807,14 @@ const trang_thai_tu_dong = (trang_thai_chon === "Chuyển viện")
                             ngay_ve_khu: ve_khu,
                             ghi_chu: ghi_chu
                         };
-                        if(!isNewDot) newLichSu[checkExistIdx] = dotObj;
+                        if(!isNewDot) newLichSu[checkExistIdx] = { ...newLichSu[checkExistIdx], ...dotObj }; // giữ các trường khác của đợt
                         else newLichSu.push(dotObj);
 
                         // Chỉ cập nhật trạng thái tổng thể khi sửa đợt mới nhất / thêm đợt mới
                         if (so_dot_nhap >= maxDot) trangThaiMoi = trang_thai_tu_dong;
                     }
 
-                    let updatedPatient = {
-                        id: parseInt(id),
+                    const capNhat = {
                         ho_ten: ho_ten,
                         nam_sinh: nam_sinh,
                         gioi_tinh: document.getElementById('p-gioitinh').value,
@@ -718,9 +824,9 @@ const trang_thai_tu_dong = (trang_thai_chon === "Chuyển viện")
                         lich_su_dot: newLichSu
                     };
 
-                    // Sử dụng ID chuẩn để set
-                    database.ref('patients/' + id).set(updatedPatient);
-                    patientsData[index] = updatedPatient;
+                    // update(): chỉ ghi các trường trên, giữ nguyên mọi trường khác của hồ sơ
+                    database.ref('patients/' + id).update(capNhat);
+                    patientsData[index] = { ...oldRecord, ...capNhat };
                 }
                 alert("Cập nhật thông tin hồ sơ bệnh nhân thành công!");
             } else {
@@ -738,20 +844,20 @@ const trang_thai_tu_dong = (trang_thai_chon === "Chuyển viện")
                         const lichSuMoi = [...(dup.lich_su_dot || []), {
                             dot: nextDot,
                             chan_doan: chan_doan,
-                            ngay_nhap_ttam: nhap_am,
+                            ngay_nhap_ttam: isBlankDate(nhap_am) ? getCenterDate(dup) : nhap_am,
                             ngay_nhap_ttram: nhap_ram,
                             ngay_ve_khu: ve_khu,
                             ghi_chu: ghi_chu
                         }];
-                        const merged = {
-                            ...dup,
+                        const capNhat = {
                             gioi_tinh: document.getElementById('p-gioitinh').value,
                             bhyt: document.getElementById('p-bhyt').value || dup.bhyt || "",
                             so_dot: lichSuMoi.length,
                             trang_thai: trang_thai_tu_dong,
                             lich_su_dot: lichSuMoi
                         };
-                        database.ref('patients/' + dup.id).set(merged);
+                        const merged = { ...dup, ...capNhat };
+                        database.ref('patients/' + dup.id).update(capNhat);
                         const di = patientsData.findIndex(item => item.id === dup.id);
                         if (di !== -1) patientsData[di] = merged;
                         alert(`Đã thêm đợt ${nextDot} vào hồ sơ của ${dup.ho_ten}!`);
@@ -851,5 +957,197 @@ function searchPatient() {
             setFilter('all');
         };
     </script>
+
+<!-- ===== Ghi chú công việc điều dưỡng (khối script riêng, độc lập với phần trên) ===== -->
+<script>
+(function () {
+    // Đặt true nếu muốn CHỈ Admin mới được sửa ghi chú
+    const EDIT_ADMIN_ONLY = false;
+
+    const $ = id => document.getElementById(id);
+    // Thiếu Firebase hoặc chưa có bảng ghi chú thì bỏ qua, không ảnh hưởng phần cũ
+    if (typeof database === 'undefined' || !$('nl-panel')) return;
+
+    const TYPES = [
+        { k: 'sinh_hieu',  l: 'Sinh hiệu',          s: 'Sinh hiệu' },
+        { k: 'phat_thuoc', l: 'Phát thuốc',         s: 'Phát thuốc' },
+        { k: 'rua_vet',    l: 'Rửa vết thương',     s: 'Rửa VT' },
+        { k: 'tiem_truyen',l: 'Tiêm truyền',        s: 'Tiêm truyền' },
+        { k: 'dot_xuat',   l: 'Tiếp nhận đột xuất', s: 'Đột xuất' }
+    ];
+    let logs = [];
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const pad = n => String(n).padStart(2, '0');
+    const today = () => { const d = new Date(); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+    const fmt = iso => { const p = (iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : (iso || ''); };
+    const typeLabel = k => { const t = TYPES.find(x => x.k === k); return t ? t.l : k; };
+    const isAdmin = () => (typeof isUserAdmin !== 'undefined') && isUserAdmin;
+
+    // Khởi tạo form
+    $('nl-type').innerHTML = TYPES.map(t => `<option value="${t.k}">${t.l}</option>`).join('');
+    $('nl-date').value = today();
+    $('nl-from').value = today();
+    $('nl-to').value = today();
+
+    function filtered() {
+        const f = $('nl-from').value, t = $('nl-to').value, n = $('nl-fnurse').value;
+        return logs
+            .filter(x => (!f || x.ngay >= f) && (!t || x.ngay <= t) && (!n || x.dd === n))
+            .sort((a, b) => (b.ngay || '').localeCompare(a.ngay || '') || (b.id - a.id));
+    }
+
+    function pivot(data) {
+        const map = {};
+        data.forEach(x => {
+            if (!map[x.dd]) { map[x.dd] = { name: x.dd, total: 0 }; TYPES.forEach(t => map[x.dd][t.k] = 0); }
+            const sl = Number(x.sl) || 1;
+            if (map[x.dd][x.loai] === undefined) map[x.dd][x.loai] = 0;
+            map[x.dd][x.loai] += sl;
+            map[x.dd].total += sl;
+        });
+        return Object.values(map).sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    }
+
+    function refreshNurses() {
+        const names = [...new Set(logs.map(x => x.dd).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'vi'));
+        const sel = $('nl-fnurse'), cur = sel.value;
+        sel.innerHTML = '<option value="">Tất cả</option>' + names.map(n => `<option value="${esc(n)}">${esc(n)}</option>`).join('');
+        sel.value = names.includes(cur) ? cur : '';
+        $('nl-dd-list').innerHTML = names.map(n => `<option value="${esc(n)}">`).join('');
+    }
+
+    // Số trên ô "GHI CHÚ ĐD": tổng số lượt công việc của hôm nay
+    function updateBadge() {
+        const t = today();
+        $('nl-today').innerText = logs.filter(x => x.ngay === t).reduce((s, x) => s + (Number(x.sl) || 1), 0);
+    }
+
+    window.nlRender = function () {
+        const data = filtered();
+
+        // Thanh thống kê 1 hàng
+        const sums = {}; let total = 0;
+        TYPES.forEach(t => sums[t.k] = 0);
+        data.forEach(x => { const sl = Number(x.sl) || 1; sums[x.loai] = (sums[x.loai] || 0) + sl; total += sl; });
+        $('nl-stats').innerHTML =
+            TYPES.map(t => `<div class="nl-stat"><h5>${t.s}</h5><p>${sums[t.k]}</p></div>`).join('') +
+            `<div class="nl-stat total"><h5>Tổng</h5><p>${total}</p></div>`;
+
+        // Bảng tổng hợp theo DD
+        $('nl-sum-head').innerHTML = '<tr><th>Điều dưỡng</th>' + TYPES.map(t => `<th>${t.s}</th>`).join('') + '<th>Tổng</th></tr>';
+        const pv = pivot(data);
+        $('nl-sum-body').innerHTML = pv.length
+            ? pv.map(r => `<tr><td class="left"><b>${esc(r.name)}</b></td>` + TYPES.map(t => `<td>${r[t.k]}</td>`).join('') + `<td><b>${r.total}</b></td></tr>`).join('')
+            : `<tr><td colspan="${TYPES.length + 2}">Chưa có dữ liệu</td></tr>`;
+
+        // Bảng chi tiết
+        const adm = isAdmin();
+        const canEdit = !EDIT_ADMIN_ONLY || adm;
+        $('nl-detail-body').innerHTML = data.length
+            ? data.map(x => `<tr>
+                <td>${fmt(x.ngay)}</td>
+                <td class="left">${esc(x.dd)}</td>
+                <td class="left">${esc(typeLabel(x.loai))}</td>
+                <td>${Number(x.sl) || 1}</td>
+                <td class="left">${esc(x.ghi_chu)}</td>
+                <td class="act">${canEdit ? `<button class="nl-btn edit" onclick="nlEdit(${x.id})">Sửa</button>` : ''}${adm ? ` <button class="nl-btn del" onclick="nlDel(${x.id})">Xóa</button>` : ''}</td>
+              </tr>`).join('')
+            : '<tr><td colspan="6">Chưa có dữ liệu</td></tr>';
+    };
+
+    window.nlToggle = function () {
+        const open = $('nl-panel').classList.toggle('open');
+        $('nl-box').classList.toggle('nl-open', open);
+        if (open) nlRender(); // cập nhật lại nút Sửa/Xóa theo quyền hiện tại
+    };
+
+    // Thoát chế độ sửa, trả form về trạng thái thêm mới
+    function resetForm() {
+        $('nl-id').value = '';
+        $('nl-note').value = '';
+        $('nl-sl').value = 1;
+        $('nl-form-title').innerText = '+ Ghi nhận công việc';
+        $('nl-save-btn').innerText = 'Lưu ghi chú';
+        $('nl-cancel-btn').style.display = 'none';
+        $('nl-form-box').classList.remove('nl-editing');
+    }
+    window.nlCancel = resetForm;
+
+    window.nlEdit = function (id) {
+        const x = logs.find(i => i.id === id);
+        if (!x) return;
+        if (EDIT_ADMIN_ONLY && !isAdmin()) return;
+        $('nl-id').value = x.id;
+        $('nl-date').value = x.ngay || today();
+        $('nl-dd').value = x.dd || '';
+        $('nl-type').value = x.loai;
+        $('nl-sl').value = Number(x.sl) || 1;
+        $('nl-note').value = x.ghi_chu || '';
+        $('nl-form-title').innerText = '✏️ Sửa ghi chú';
+        $('nl-save-btn').innerText = 'Cập nhật';
+        $('nl-cancel-btn').style.display = 'inline-block';
+        $('nl-form-box').classList.add('nl-editing');
+        $('nl-form-box').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    window.nlSave = function () {
+        const editId = $('nl-id').value;
+        const ngay = $('nl-date').value;
+        const dd = $('nl-dd').value.trim();
+        const loai = $('nl-type').value;
+        const sl = parseInt($('nl-sl').value) || 1;
+        const ghi_chu = $('nl-note').value.trim();
+        if (!ngay || !dd) { alert('Vui lòng nhập Ngày và Tên điều dưỡng!'); return; }
+
+        const id = editId ? Number(editId) : Date.now();
+        database.ref('nursing_logs/' + id).set({ id, ngay, dd, loai, sl, ghi_chu })
+            .then(() => { resetForm(); })
+            .catch(e => alert('Không lưu được: ' + e.message));
+    };
+
+    window.nlDel = function (id) {
+        if (!isAdmin()) return;
+        if (confirm('Xóa dòng ghi chú này?')) {
+            database.ref('nursing_logs/' + id).remove();
+            if (Number($('nl-id').value) === id) resetForm();
+        }
+    };
+
+    window.nlExport = function () {
+        const data = filtered();
+        if (!data.length) { alert('Không có dữ liệu để xuất.'); return; }
+        const detail = data.map((x, i) => ({
+            'STT': i + 1, 'Ngày': fmt(x.ngay), 'Điều dưỡng': x.dd,
+            'Công việc': typeLabel(x.loai), 'Số lượt': Number(x.sl) || 1, 'Ghi chú': x.ghi_chu || ''
+        }));
+        const summary = pivot(data).map(r => {
+            const o = { 'Điều dưỡng': r.name };
+            TYPES.forEach(t => o[t.l] = r[t.k]);
+            o['Tổng'] = r.total;
+            return o;
+        });
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summary), 'Tong hop theo DD');
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detail), 'Chi tiet');
+        const f = $('nl-from').value || 'all', t = $('nl-to').value || 'all';
+        XLSX.writeFile(wb, 'Thong_ke_dieu_duong_' + f + '_den_' + t + '.xlsx');
+    };
+
+    // Lắng nghe dữ liệu realtime (nhánh riêng, không đụng 'patients')
+    try {
+        database.ref('nursing_logs').on('value', snap => {
+            logs = [];
+            const d = snap.val();
+            if (d) Object.keys(d).forEach(k => { if (d[k] && d[k].id) logs.push(d[k]); });
+            refreshNurses();
+            updateBadge();
+            nlRender();
+        }, err => console.error('nursing_logs:', err));
+    } catch (e) { console.error(e); }
+
+    updateBadge();
+    nlRender();
+})();
+</script>
 </body>
 </html>
